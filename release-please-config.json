@@ -7,5 +7,15 @@
 	"bump-minor-pre-major": true,
 	"bump-patch-for-minor-pre-major": true,
 	"initial-version": "0.1.0",
-	"packages": {}
+	"packages": {
+		"packages/retry-strategies": {
+			"extra-files": [
+				{
+					"type": "json",
+					"path": "packages/retry-strategies/jsr.json",
+					"jsonpath": "$.version"
+				}
+			]
+		}
+	}
 }

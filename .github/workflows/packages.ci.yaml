@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       # "packages/<package name>": ${{ steps.filter.outputs['packages/<package name>'] }}
+      "packages/retry-strategies": ${{ steps.filter.outputs['packages/retry-strategies'] }}
       "empty": "empty"
 
     steps:
@@ -33,6 +34,18 @@ jobs:
           #   - 'packages/<package name>/**'
           #   - '.github/workflows/_template.package-ci.yaml'
           filters: |
+            "packages/retry-strategies":
+              - 'packages/retry-strategies/**'
+              - '.github/workflows/_template.package-ci.yaml'
+
+  retry-strategies:
+    name: retry-strategies
+    needs: detect-changes
+    if: needs.detect-changes.outputs['packages/retry-strategies'] == 'true'
+    uses: ./.github/workflows/_template.package-ci.yaml
+    with:
+      package_path: "packages/retry-strategies"
+      package_name: "@proventuslabs/retry-strategies"
 
   # <package name>:
   #   name: <package name>

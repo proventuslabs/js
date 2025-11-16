@@ -1,0 +1,44 @@
+name: Packages CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  detect-changes:
+    name: Detect changed packages
+    timeout-minutes: 5
+    runs-on: ubuntu-24.04
+    outputs:
+      # "packages/<package name>": ${{ steps.filter.outputs['packages/<package name>'] }}
+      "empty": "empty"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Apply filters
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          # "packages/<package name>":
+          #   - 'packages/<package name>/**'
+          #   - '.github/workflows/_template.package-ci.yaml'
+          filters: |
+
+  # <package name>:
+  #   name: <package name>
+  #   needs: detect-changes
+  #   if: needs.detect-changes.outputs['packages/<package name>'] == 'true'
+  #   uses: ./.github/workflows/_template.package-ci.yaml
+  #   with:
+  #     package_path: "packages/<package name>"
+  #     package_name: "@proventuslabs/<package name>"

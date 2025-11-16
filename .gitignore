@@ -1,0 +1,42 @@
+# Ignore everything
+*
+
+# But not these files...
+!.gitignore
+!.ignore
+
+# node files
+!package.json
+!jsr.json
+!pnpm-*.yaml
+
+# typescript files
+!*.ts
+# template files
+!*.hbs
+
+# config files
+!.editorconfig
+!biome.json
+!turbo.json
+!tsconfig*.json
+!flake.nix
+!flake.lock
+!.release-please-manifest.json
+!release-please-config.json
+!.github/**/*
+!.vscode/**/*
+
+# Documentation
+!LICENSE
+!README.md
+!CONTRIBUTING.md
+!CLAUDE.md
+
+# ...even if they are in subdirectories
+!*/
+
+# keep always ignored
+node_modules/
+dist/
+coverage/

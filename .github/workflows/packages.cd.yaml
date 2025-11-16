@@ -1,0 +1,48 @@
+name: Packages CD
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    timeout-minutes: 5
+    runs-on: ubuntu-24.04
+    outputs:
+      # You need to explicitly output the tag name and release_created for each package
+      # This assumes your release-please-config.json and .release-please-manifest.json
+      # are set up to handle multiple packages and will output these.
+      # "packages/<package name>--tag_name": ${{ steps.release.outputs['packages/<package name>--tag_name'] }}
+      # "packages/<package name>--release_created": ${{ steps.release.outputs['packages/<package name>--release_created'] }}
+      "empty": "empty"
+
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      - name: Print release outputs for debugging
+        continue-on-error: true
+        run: |
+          echo "Release outputs:"
+          echo "${{ toJson(steps.release.outputs) }}"
+
+  # <package name>:
+  #   name: <package name>
+  #   needs: release-please
+  #   if: ${{ needs.release-please.outputs['packages/<package name>--release_created'] == 'true' }}
+  #   uses: ./.github/workflows/_template.package-cd.yaml
+  #   with:
+  #     package_path: "packages/<package name>"
+  #     package_name: "@proventuslabs/<package name>"
+  #     package_tag: ${{ needs.release-please.outputs['packages/<package name>--tag_name'] }}
+  #   secrets:
+  #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

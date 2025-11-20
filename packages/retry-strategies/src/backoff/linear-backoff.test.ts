@@ -3,7 +3,7 @@ import { describe, it, type TestContext } from "node:test";
 import { LinearBackoff } from "./linear-backoff.ts";
 
 /* node:coverage disable */
-describe("LinearBackoff", () => {
+describe("LinearBackoff - Unit tests", () => {
 	describe("when calculating backoff delays", () => {
 		it("should increase delay linearly with default initial delay", (ctx: TestContext) => {
 			ctx.plan(5);
@@ -89,7 +89,10 @@ describe("LinearBackoff", () => {
 			// Act & Assert
 			ctx.assert.throws(() => new LinearBackoff(0.5), RangeError);
 			ctx.assert.throws(() => new LinearBackoff(Number.NaN), RangeError);
-			ctx.assert.throws(() => new LinearBackoff(Number.POSITIVE_INFINITY), RangeError);
+			ctx.assert.throws(
+				() => new LinearBackoff(Number.POSITIVE_INFINITY),
+				RangeError,
+			);
 		});
 
 		it("should reject negative increment", (ctx: TestContext) => {
@@ -105,7 +108,10 @@ describe("LinearBackoff", () => {
 			// Act & Assert
 			ctx.assert.throws(() => new LinearBackoff(100, 0.5), RangeError);
 			ctx.assert.throws(() => new LinearBackoff(100, Number.NaN), RangeError);
-			ctx.assert.throws(() => new LinearBackoff(100, Number.POSITIVE_INFINITY), RangeError);
+			ctx.assert.throws(
+				() => new LinearBackoff(100, Number.POSITIVE_INFINITY),
+				RangeError,
+			);
 		});
 
 		it("should reject negative initial delay", (ctx: TestContext) => {

@@ -73,15 +73,15 @@ describe("ConstantBackoff", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 0);
 		});
 
-		it("should support fractional delays", (ctx: TestContext) => {
+		it("should support large safe integer delays", (ctx: TestContext) => {
 			ctx.plan(2);
 
 			// Arrange
-			const backoff = new ConstantBackoff(123.45);
+			const backoff = new ConstantBackoff(Number.MAX_SAFE_INTEGER);
 
 			// Act & Assert
-			ctx.assert.strictEqual(backoff.nextBackoff(), 123.45);
-			ctx.assert.strictEqual(backoff.nextBackoff(), 123.45);
+			ctx.assert.strictEqual(backoff.nextBackoff(), Number.MAX_SAFE_INTEGER);
+			ctx.assert.strictEqual(backoff.nextBackoff(), Number.MAX_SAFE_INTEGER);
 		});
 	});
 
@@ -322,7 +322,7 @@ describe("ConstantBackoff", () => {
 			);
 		});
 
-		it("should accept zero and positive delays", (ctx: TestContext) => {
+		it("should accept zero and positive safe integer delays", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Act & Assert
@@ -339,8 +339,56 @@ describe("ConstantBackoff", () => {
 				"Should accept delay of 100",
 			);
 			ctx.assert.doesNotThrow(
+				() => new ConstantBackoff(Number.MAX_SAFE_INTEGER),
+				"Should accept MAX_SAFE_INTEGER",
+			);
+		});
+
+		it("should reject fractional delays", (ctx: TestContext) => {
+			ctx.plan(3);
+
+			// Act & Assert
+			ctx.assert.throws(
 				() => new ConstantBackoff(0.5),
-				"Should accept fractional delay of 0.5",
+				RangeError,
+				"Should throw RangeError for delay of 0.5",
+			);
+			ctx.assert.throws(
+				() => new ConstantBackoff(123.45),
+				RangeError,
+				"Should throw RangeError for delay of 123.45",
+			);
+			ctx.assert.throws(
+				() => new ConstantBackoff(1000.1),
+				RangeError,
+				"Should throw RangeError for delay of 1000.1",
+			);
+		});
+
+		it("should reject infinity values", (ctx: TestContext) => {
+			ctx.plan(2);
+
+			// Act & Assert
+			ctx.assert.throws(
+				() => new ConstantBackoff(Number.POSITIVE_INFINITY),
+				RangeError,
+				"Should throw RangeError for POSITIVE_INFINITY",
+			);
+			ctx.assert.throws(
+				() => new ConstantBackoff(Number.NEGATIVE_INFINITY),
+				RangeError,
+				"Should throw RangeError for NEGATIVE_INFINITY",
+			);
+		});
+
+		it("should reject values larger than MAX_SAFE_INTEGER", (ctx: TestContext) => {
+			ctx.plan(1);
+
+			// Act & Assert
+			ctx.assert.throws(
+				() => new ConstantBackoff(Number.MAX_SAFE_INTEGER + 1),
+				RangeError,
+				"Should throw RangeError for MAX_SAFE_INTEGER + 1",
 			);
 		});
 

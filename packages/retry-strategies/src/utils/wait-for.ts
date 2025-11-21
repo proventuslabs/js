@@ -2,7 +2,7 @@
  * Maximum safe delay value for setTimeout (2^31 - 1 milliseconds, approximately 24.8 days).
  * Values exceeding this will cause setTimeout to wrap around and behave unexpectedly.
  */
-const INT32_MAX = 0x7fffffff;
+export const INT32_MAX = 0x7fffffff;
 
 /**
  * Waits for the specified amount of time or until an optional AbortSignal is triggered.

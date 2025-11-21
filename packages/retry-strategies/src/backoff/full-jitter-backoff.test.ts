@@ -16,15 +16,35 @@ suite("Full jitter backoff strategy (Unit)", () => {
 
 			// Act & Assert
 			// attempt 0: random(0, min(10000, 100 * 2^0)) = random(0, 100) = floor(0.5 * 100) = 50
-			ctx.assert.strictEqual(backoff.nextBackoff(), 50);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				50,
+				"should return random delay with 50% jitter",
+			);
 			// attempt 1: random(0, min(10000, 100 * 2^1)) = random(0, 200) = floor(0.3 * 200) = 60
-			ctx.assert.strictEqual(backoff.nextBackoff(), 60);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				60,
+				"should return random delay with 30% jitter",
+			);
 			// attempt 2: random(0, min(10000, 100 * 2^2)) = random(0, 400) = floor(0.8 * 400) = 320
-			ctx.assert.strictEqual(backoff.nextBackoff(), 320);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				320,
+				"should return random delay with 80% jitter",
+			);
 			// attempt 3: random(0, min(10000, 100 * 2^3)) = random(0, 800) = floor(0.1 * 800) = 80
-			ctx.assert.strictEqual(backoff.nextBackoff(), 80);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				80,
+				"should return random delay with 10% jitter",
+			);
 			// attempt 4: random(0, min(10000, 100 * 2^4)) = random(0, 1600) = floor(0.9 * 1600) = 1440
-			ctx.assert.strictEqual(backoff.nextBackoff(), 1440);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				1440,
+				"should return random delay with 90% jitter",
+			);
 		});
 
 		test("caps maximum delay range", (ctx: TestContext) => {
@@ -35,11 +55,31 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			const backoff = new FullJitterBackoff(100, 500);
 
 			// Act & Assert
-			ctx.assert.strictEqual(backoff.nextBackoff(), 50); // floor(0.5 * min(500, 100)) = 50
-			ctx.assert.strictEqual(backoff.nextBackoff(), 100); // floor(0.5 * min(500, 200)) = 100
-			ctx.assert.strictEqual(backoff.nextBackoff(), 200); // floor(0.5 * min(500, 400)) = 200
-			ctx.assert.strictEqual(backoff.nextBackoff(), 250); // floor(0.5 * min(500, 800)) = 250
-			ctx.assert.strictEqual(backoff.nextBackoff(), 250); // floor(0.5 * min(500, 1600)) = 250
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				50,
+				"should return delay before cap",
+			); // floor(0.5 * min(500, 100)) = 50
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				100,
+				"should return delay before cap",
+			); // floor(0.5 * min(500, 200)) = 100
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				200,
+				"should return delay before cap",
+			); // floor(0.5 * min(500, 400)) = 200
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				250,
+				"should cap at maximum",
+			); // floor(0.5 * min(500, 800)) = 250
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				250,
+				"should remain at cap",
+			); // floor(0.5 * min(500, 1600)) = 250
 		});
 
 		test("handles zero base delay", (ctx: TestContext) => {
@@ -49,9 +89,13 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			const backoff = new FullJitterBackoff(0, 1000);
 
 			// Act & Assert
-			ctx.assert.strictEqual(backoff.nextBackoff(), 0); // random(0, 0) = 0
-			ctx.assert.strictEqual(backoff.nextBackoff(), 0); // random(0, 0) = 0
-			ctx.assert.strictEqual(backoff.nextBackoff(), 0); // random(0, 0) = 0
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms with zero base",
+			); // random(0, 0) = 0
+			ctx.assert.strictEqual(backoff.nextBackoff(), 0, "should remain 0ms"); // random(0, 0) = 0
+			ctx.assert.strictEqual(backoff.nextBackoff(), 0, "should remain 0ms"); // random(0, 0) = 0
 		});
 
 		test("handles base equal to cap", (ctx: TestContext) => {
@@ -64,9 +108,21 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			const backoff = new FullJitterBackoff(500, 500);
 
 			// Act & Assert
-			ctx.assert.strictEqual(backoff.nextBackoff(), 250); // floor(0.5 * 500)
-			ctx.assert.strictEqual(backoff.nextBackoff(), 400); // floor(0.8 * min(500, 1000))
-			ctx.assert.strictEqual(backoff.nextBackoff(), 100); // floor(0.2 * min(500, 2000))
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				250,
+				"should return jittered delay when base equals cap",
+			); // floor(0.5 * 500)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				400,
+				"should remain at cap with different jitter",
+			); // floor(0.8 * min(500, 1000))
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				100,
+				"should remain at cap with different jitter",
+			); // floor(0.2 * min(500, 2000))
 		});
 
 		test("returns minimum delay when random returns 0", (ctx: TestContext) => {
@@ -77,9 +133,13 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			const backoff = new FullJitterBackoff(100, 10000);
 
 			// Act & Assert
-			ctx.assert.strictEqual(backoff.nextBackoff(), 0);
-			ctx.assert.strictEqual(backoff.nextBackoff(), 0);
-			ctx.assert.strictEqual(backoff.nextBackoff(), 0);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms with zero random",
+			);
+			ctx.assert.strictEqual(backoff.nextBackoff(), 0, "should remain at 0ms");
+			ctx.assert.strictEqual(backoff.nextBackoff(), 0, "should remain at 0ms");
 		});
 
 		test("returns maximum delay when random returns close to 1", (ctx: TestContext) => {
@@ -90,9 +150,21 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			const backoff = new FullJitterBackoff(100, 10000);
 
 			// Act & Assert
-			ctx.assert.strictEqual(backoff.nextBackoff(), 99); // floor(0.999999 * 100)
-			ctx.assert.strictEqual(backoff.nextBackoff(), 199); // floor(0.999999 * 200)
-			ctx.assert.strictEqual(backoff.nextBackoff(), 399); // floor(0.999999 * 400)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				99,
+				"should return near-maximum delay",
+			); // floor(0.999999 * 100)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				199,
+				"should return near-maximum delay",
+			); // floor(0.999999 * 200)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				399,
+				"should return near-maximum delay",
+			); // floor(0.999999 * 400)
 		});
 
 		test("produces variable delays with default Math.random", (ctx: TestContext) => {
@@ -110,7 +182,10 @@ suite("Full jitter backoff strategy (Unit)", () => {
 
 			// Assert
 			// Check that delays are within expected ranges
-			ctx.assert.ok(delays[0] >= 0 && delays[0] < 100);
+			ctx.assert.ok(
+				delays[0] >= 0 && delays[0] < 100,
+				"should produce delay in expected range",
+			);
 		});
 	});
 
@@ -123,15 +198,39 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			const backoff = new FullJitterBackoff(100, 10000);
 
 			// Act & Assert
-			ctx.assert.strictEqual(backoff.nextBackoff(), 50); // floor(0.5 * 100)
-			ctx.assert.strictEqual(backoff.nextBackoff(), 100); // floor(0.5 * 200)
-			ctx.assert.strictEqual(backoff.nextBackoff(), 200); // floor(0.5 * 400)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				50,
+				"should return first delay before reset",
+			); // floor(0.5 * 100)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				100,
+				"should return second delay before reset",
+			); // floor(0.5 * 200)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				200,
+				"should return third delay before reset",
+			); // floor(0.5 * 400)
 
 			backoff.resetBackoff();
 
-			ctx.assert.strictEqual(backoff.nextBackoff(), 50); // floor(0.5 * 100)
-			ctx.assert.strictEqual(backoff.nextBackoff(), 100); // floor(0.5 * 200)
-			ctx.assert.strictEqual(backoff.nextBackoff(), 200); // floor(0.5 * 400)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				50,
+				"should restart from first delay after reset",
+			); // floor(0.5 * 100)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				100,
+				"should return second delay after reset",
+			); // floor(0.5 * 200)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				200,
+				"should return third delay after reset",
+			); // floor(0.5 * 400)
 		});
 	});
 
@@ -148,10 +247,26 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			const backoff2 = new FullJitterBackoff(50, 5000);
 
 			// Act & Assert
-			ctx.assert.strictEqual(backoff1.nextBackoff(), 50); // floor(0.5 * 100)
-			ctx.assert.strictEqual(backoff2.nextBackoff(), 15); // floor(0.3 * 50)
-			ctx.assert.strictEqual(backoff1.nextBackoff(), 100); // floor(0.5 * 200)
-			ctx.assert.strictEqual(backoff2.nextBackoff(), 30); // floor(0.3 * 100)
+			ctx.assert.strictEqual(
+				backoff1.nextBackoff(),
+				50,
+				"should return first instance first delay",
+			); // floor(0.5 * 100)
+			ctx.assert.strictEqual(
+				backoff2.nextBackoff(),
+				15,
+				"should return second instance first delay",
+			); // floor(0.3 * 50)
+			ctx.assert.strictEqual(
+				backoff1.nextBackoff(),
+				100,
+				"should return first instance second delay",
+			); // floor(0.5 * 200)
+			ctx.assert.strictEqual(
+				backoff2.nextBackoff(),
+				30,
+				"should return second instance second delay",
+			); // floor(0.3 * 100)
 		});
 	});
 
@@ -160,14 +275,20 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			ctx.plan(3);
 
 			// Act & Assert
-			ctx.assert.throws(() => new FullJitterBackoff(0.5, 1000), RangeError);
+			ctx.assert.throws(
+				() => new FullJitterBackoff(0.5, 1000),
+				RangeError,
+				"should reject fractional base",
+			);
 			ctx.assert.throws(
 				() => new FullJitterBackoff(Number.NaN, 1000),
 				RangeError,
+				"should reject NaN base",
 			);
 			ctx.assert.throws(
 				() => new FullJitterBackoff(Number.POSITIVE_INFINITY, 1000),
 				RangeError,
+				"should reject infinite base",
 			);
 		});
 
@@ -175,21 +296,31 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(() => new FullJitterBackoff(-100, 1000), RangeError);
+			ctx.assert.throws(
+				() => new FullJitterBackoff(-100, 1000),
+				RangeError,
+				"should reject negative base",
+			);
 		});
 
 		test("rejects non-integer cap values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Act & Assert
-			ctx.assert.throws(() => new FullJitterBackoff(100, 0.5), RangeError);
+			ctx.assert.throws(
+				() => new FullJitterBackoff(100, 0.5),
+				RangeError,
+				"should reject fractional cap",
+			);
 			ctx.assert.throws(
 				() => new FullJitterBackoff(100, Number.NaN),
 				RangeError,
+				"should reject NaN cap",
 			);
 			ctx.assert.throws(
 				() => new FullJitterBackoff(100, Number.POSITIVE_INFINITY),
 				RangeError,
+				"should reject infinite cap",
 			);
 		});
 
@@ -197,17 +328,33 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(() => new FullJitterBackoff(1000, 500), RangeError);
+			ctx.assert.throws(
+				() => new FullJitterBackoff(1000, 500),
+				RangeError,
+				"should reject cap less than base",
+			);
 		});
 
 		test("accepts valid parameter combinations", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Act & Assert
-			ctx.assert.doesNotThrow(() => new FullJitterBackoff(0, 0));
-			ctx.assert.doesNotThrow(() => new FullJitterBackoff(100, 100));
-			ctx.assert.doesNotThrow(() => new FullJitterBackoff(100, 1000));
-			ctx.assert.doesNotThrow(() => new FullJitterBackoff(100, 10000));
+			ctx.assert.doesNotThrow(
+				() => new FullJitterBackoff(0, 0),
+				"should accept zero base and cap",
+			);
+			ctx.assert.doesNotThrow(
+				() => new FullJitterBackoff(100, 100),
+				"should accept equal base and cap",
+			);
+			ctx.assert.doesNotThrow(
+				() => new FullJitterBackoff(100, 1000),
+				"should accept base less than cap",
+			);
+			ctx.assert.doesNotThrow(
+				() => new FullJitterBackoff(100, 10000),
+				"should accept valid parameters",
+			);
 		});
 	});
 });

@@ -12,9 +12,18 @@ suite("Stop backoff strategy (Unit)", () => {
 			const backoff = new StopBackoff();
 
 			// Act & Assert
-			ctx.assert.ok(Number.isNaN(backoff.nextBackoff()));
-			ctx.assert.ok(Number.isNaN(backoff.nextBackoff()));
-			ctx.assert.ok(Number.isNaN(backoff.nextBackoff()));
+			ctx.assert.ok(
+				Number.isNaN(backoff.nextBackoff()),
+				"should return NaN to signal no retry",
+			);
+			ctx.assert.ok(
+				Number.isNaN(backoff.nextBackoff()),
+				"should continue returning NaN",
+			);
+			ctx.assert.ok(
+				Number.isNaN(backoff.nextBackoff()),
+				"should continue returning NaN",
+			);
 		});
 	});
 
@@ -26,13 +35,25 @@ suite("Stop backoff strategy (Unit)", () => {
 			const backoff = new StopBackoff();
 
 			// Act & Assert
-			ctx.assert.ok(Number.isNaN(backoff.nextBackoff()));
-			ctx.assert.ok(Number.isNaN(backoff.nextBackoff()));
+			ctx.assert.ok(
+				Number.isNaN(backoff.nextBackoff()),
+				"should return NaN before reset",
+			);
+			ctx.assert.ok(
+				Number.isNaN(backoff.nextBackoff()),
+				"should continue returning NaN before reset",
+			);
 
 			backoff.resetBackoff();
 
-			ctx.assert.ok(Number.isNaN(backoff.nextBackoff()));
-			ctx.assert.ok(Number.isNaN(backoff.nextBackoff()));
+			ctx.assert.ok(
+				Number.isNaN(backoff.nextBackoff()),
+				"should return NaN after reset",
+			);
+			ctx.assert.ok(
+				Number.isNaN(backoff.nextBackoff()),
+				"should continue returning NaN after reset",
+			);
 		});
 	});
 
@@ -45,13 +66,25 @@ suite("Stop backoff strategy (Unit)", () => {
 			const backoff2 = new StopBackoff();
 
 			// Act & Assert
-			ctx.assert.ok(Number.isNaN(backoff1.nextBackoff()));
-			ctx.assert.ok(Number.isNaN(backoff2.nextBackoff()));
+			ctx.assert.ok(
+				Number.isNaN(backoff1.nextBackoff()),
+				"should return NaN from first instance",
+			);
+			ctx.assert.ok(
+				Number.isNaN(backoff2.nextBackoff()),
+				"should return NaN from second instance",
+			);
 
 			backoff1.resetBackoff();
 
-			ctx.assert.ok(Number.isNaN(backoff1.nextBackoff()));
-			ctx.assert.ok(Number.isNaN(backoff2.nextBackoff()));
+			ctx.assert.ok(
+				Number.isNaN(backoff1.nextBackoff()),
+				"should return NaN from first instance after reset",
+			);
+			ctx.assert.ok(
+				Number.isNaN(backoff2.nextBackoff()),
+				"should not affect second instance",
+			);
 		});
 	});
 });

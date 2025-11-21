@@ -12,9 +12,21 @@ suite("Constant backoff strategy (Unit)", () => {
 			const backoff = new ConstantBackoff(1000);
 
 			// Act & Assert
-			ctx.assert.strictEqual(backoff.nextBackoff(), 1000);
-			ctx.assert.strictEqual(backoff.nextBackoff(), 1000);
-			ctx.assert.strictEqual(backoff.nextBackoff(), 1000);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				1000,
+				"should return constant delay on first call",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				1000,
+				"should return constant delay on second call",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				1000,
+				"should return constant delay on third call",
+			);
 		});
 
 		test("supports different delay values", (ctx: TestContext) => {
@@ -22,13 +34,25 @@ suite("Constant backoff strategy (Unit)", () => {
 
 			// Arrange & Act & Assert
 			const backoff100 = new ConstantBackoff(100);
-			ctx.assert.strictEqual(backoff100.nextBackoff(), 100);
+			ctx.assert.strictEqual(
+				backoff100.nextBackoff(),
+				100,
+				"should return 100ms delay",
+			);
 
 			const backoff500 = new ConstantBackoff(500);
-			ctx.assert.strictEqual(backoff500.nextBackoff(), 500);
+			ctx.assert.strictEqual(
+				backoff500.nextBackoff(),
+				500,
+				"should return 500ms delay",
+			);
 
 			const backoff0 = new ConstantBackoff(0);
-			ctx.assert.strictEqual(backoff0.nextBackoff(), 0);
+			ctx.assert.strictEqual(
+				backoff0.nextBackoff(),
+				0,
+				"should return 0ms delay",
+			);
 		});
 	});
 
@@ -40,13 +64,29 @@ suite("Constant backoff strategy (Unit)", () => {
 			const backoff = new ConstantBackoff(1000);
 
 			// Act & Assert
-			ctx.assert.strictEqual(backoff.nextBackoff(), 1000);
-			ctx.assert.strictEqual(backoff.nextBackoff(), 1000);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				1000,
+				"should return delay before reset",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				1000,
+				"should return delay before reset",
+			);
 
 			backoff.resetBackoff();
 
-			ctx.assert.strictEqual(backoff.nextBackoff(), 1000);
-			ctx.assert.strictEqual(backoff.nextBackoff(), 1000);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				1000,
+				"should return same delay after reset",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				1000,
+				"should return same delay after reset",
+			);
 		});
 	});
 
@@ -59,13 +99,29 @@ suite("Constant backoff strategy (Unit)", () => {
 			const backoff2 = new ConstantBackoff(500);
 
 			// Act & Assert
-			ctx.assert.strictEqual(backoff1.nextBackoff(), 100);
-			ctx.assert.strictEqual(backoff2.nextBackoff(), 500);
+			ctx.assert.strictEqual(
+				backoff1.nextBackoff(),
+				100,
+				"should return first instance delay",
+			);
+			ctx.assert.strictEqual(
+				backoff2.nextBackoff(),
+				500,
+				"should return second instance delay",
+			);
 
 			backoff1.resetBackoff();
 
-			ctx.assert.strictEqual(backoff1.nextBackoff(), 100);
-			ctx.assert.strictEqual(backoff2.nextBackoff(), 500);
+			ctx.assert.strictEqual(
+				backoff1.nextBackoff(),
+				100,
+				"should return first instance delay after reset",
+			);
+			ctx.assert.strictEqual(
+				backoff2.nextBackoff(),
+				500,
+				"should not affect second instance",
+			);
 		});
 	});
 
@@ -74,11 +130,20 @@ suite("Constant backoff strategy (Unit)", () => {
 			ctx.plan(3);
 
 			// Act & Assert
-			ctx.assert.throws(() => new ConstantBackoff(0.5), RangeError);
-			ctx.assert.throws(() => new ConstantBackoff(Number.NaN), RangeError);
+			ctx.assert.throws(
+				() => new ConstantBackoff(0.5),
+				RangeError,
+				"should reject fractional delay",
+			);
+			ctx.assert.throws(
+				() => new ConstantBackoff(Number.NaN),
+				RangeError,
+				"should reject NaN delay",
+			);
 			ctx.assert.throws(
 				() => new ConstantBackoff(Number.POSITIVE_INFINITY),
 				RangeError,
+				"should reject infinite delay",
 			);
 		});
 
@@ -86,17 +151,28 @@ suite("Constant backoff strategy (Unit)", () => {
 			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(() => new ConstantBackoff(-100), RangeError);
+			ctx.assert.throws(
+				() => new ConstantBackoff(-100),
+				RangeError,
+				"should reject negative delay",
+			);
 		});
 
 		test("accepts valid delay values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Act & Assert
-			ctx.assert.doesNotThrow(() => new ConstantBackoff(0));
-			ctx.assert.doesNotThrow(() => new ConstantBackoff(100));
+			ctx.assert.doesNotThrow(
+				() => new ConstantBackoff(0),
+				"should accept zero delay",
+			);
+			ctx.assert.doesNotThrow(
+				() => new ConstantBackoff(100),
+				"should accept positive delay",
+			);
 			ctx.assert.doesNotThrow(
 				() => new ConstantBackoff(Number.MAX_SAFE_INTEGER),
+				"should accept MAX_SAFE_INTEGER delay",
 			);
 		});
 	});

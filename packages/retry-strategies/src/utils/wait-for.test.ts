@@ -19,7 +19,7 @@ suite("Wait for delay (Unit)", () => {
 			await promise;
 
 			// Assert
-			ctx.assert.ok(true);
+			ctx.assert.ok(true, "should resolve after specified delay");
 		});
 	});
 
@@ -39,6 +39,7 @@ suite("Wait for delay (Unit)", () => {
 			await ctx.assert.rejects(
 				promise,
 				(error: Error) => error.message === "Aborted",
+				"should reject with abort reason",
 			);
 		});
 	});
@@ -57,7 +58,7 @@ suite("Wait for delay (Unit)", () => {
 			await promise;
 
 			// Assert
-			ctx.assert.ok(true);
+			ctx.assert.ok(true, "should resolve immediately with negative delay");
 		});
 	});
 
@@ -78,6 +79,7 @@ suite("Wait for delay (Unit)", () => {
 						error.message.includes("Delay must not exceed")
 					);
 				},
+				"should throw RangeError when delay exceeds INT32_MAX",
 			);
 		});
 
@@ -98,6 +100,7 @@ suite("Wait for delay (Unit)", () => {
 						error.message.includes(`${delay}`)
 					);
 				},
+				"should include both INT32_MAX and actual delay in error message",
 			);
 		});
 	});
@@ -116,7 +119,7 @@ suite("Wait for delay (Unit)", () => {
 			await promise;
 
 			// Assert
-			ctx.assert.ok(true);
+			ctx.assert.ok(true, "should succeed with INT32_MAX delay");
 		});
 	});
 });

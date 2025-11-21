@@ -22,8 +22,16 @@ suite("Retry functionality (Unit)", () => {
 			const result = await retry(successFn, { strategy: mockStrategy });
 
 			// Assert
-			ctx.assert.strictEqual(result, "success");
-			ctx.assert.strictEqual(successFn.mock.callCount(), 1);
+			ctx.assert.strictEqual(
+				result,
+				"success",
+				"should return the success result",
+			);
+			ctx.assert.strictEqual(
+				successFn.mock.callCount(),
+				1,
+				"should call function only once",
+			);
 		});
 	});
 
@@ -50,9 +58,21 @@ suite("Retry functionality (Unit)", () => {
 			const result = await retry(flakeyFn, { strategy: mockStrategy });
 
 			// Assert
-			ctx.assert.strictEqual(result, "success");
-			ctx.assert.strictEqual(flakeyFn.mock.callCount(), 3);
-			ctx.assert.strictEqual(mockStrategy.nextBackoff.mock.callCount(), 2);
+			ctx.assert.strictEqual(
+				result,
+				"success",
+				"should return success after retries",
+			);
+			ctx.assert.strictEqual(
+				flakeyFn.mock.callCount(),
+				3,
+				"should call function three times",
+			);
+			ctx.assert.strictEqual(
+				mockStrategy.nextBackoff.mock.callCount(),
+				2,
+				"should calculate backoff twice",
+			);
 		});
 	});
 
@@ -78,8 +98,13 @@ suite("Retry functionality (Unit)", () => {
 			await ctx.assert.rejects(
 				retry(failingFn, { strategy: mockStrategy }),
 				(error: Error) => error.message === "Failed",
+				"should throw the last error when strategy is exhausted",
 			);
-			ctx.assert.strictEqual(failingFn.mock.callCount(), 3);
+			ctx.assert.strictEqual(
+				failingFn.mock.callCount(),
+				3,
+				"should attempt three times before giving up",
+			);
 		});
 	});
 
@@ -107,8 +132,13 @@ suite("Retry functionality (Unit)", () => {
 			await ctx.assert.rejects(
 				retry(failingFn, { strategy: mockStrategy, stop: exitFn }),
 				(error: Error) => error.message === "Fatal",
+				"should throw fatal error when stop condition is met",
 			);
-			ctx.assert.strictEqual(failingFn.mock.callCount(), 2);
+			ctx.assert.strictEqual(
+				failingFn.mock.callCount(),
+				2,
+				"should call function twice before stopping",
+			);
 		});
 
 		test("continues retrying until condition met", async (ctx: TestContext) => {
@@ -138,8 +168,16 @@ suite("Retry functionality (Unit)", () => {
 			});
 
 			// Assert
-			ctx.assert.strictEqual(result, "success");
-			ctx.assert.strictEqual(exitFn.mock.callCount(), 2);
+			ctx.assert.strictEqual(
+				result,
+				"success",
+				"should return success after retries",
+			);
+			ctx.assert.strictEqual(
+				exitFn.mock.callCount(),
+				2,
+				"should check stop condition for each error",
+			);
 		});
 
 		test("provides attempt index to stop function", async (ctx: TestContext) => {
@@ -163,13 +201,22 @@ suite("Retry functionality (Unit)", () => {
 			// Act & Assert
 			await ctx.assert.rejects(
 				retry(fn, { strategy: mockStrategy, stop: stopFn }),
+				"should throw error when stop condition is met",
 			);
 
 			// Assert stop was called twice (attempt 0 and attempt 1)
-			ctx.assert.deepStrictEqual(stopFn.mock.callCount(), 2);
+			ctx.assert.deepStrictEqual(
+				stopFn.mock.callCount(),
+				2,
+				"should call stop function twice",
+			);
 
 			// Assert fn was called twice (attempt 0 and attempt 1)
-			ctx.assert.strictEqual(fn.mock.callCount(), 2);
+			ctx.assert.strictEqual(
+				fn.mock.callCount(),
+				2,
+				"should call function twice",
+			);
 		});
 	});
 
@@ -200,6 +247,7 @@ suite("Retry functionality (Unit)", () => {
 			await ctx.assert.rejects(
 				promise,
 				(error: Error) => error.message === "Aborted",
+				"should reject with abort reason",
 			);
 		});
 	});
@@ -218,7 +266,11 @@ suite("Retry functionality (Unit)", () => {
 			} satisfies BackoffStrategy;
 
 			const checkFn = ctx.mock.fn(() => {
-				ctx.assert.strictEqual(resetCalled, true);
+				ctx.assert.strictEqual(
+					resetCalled,
+					true,
+					"should have reset strategy before first attempt",
+				);
 				return "done";
 			});
 
@@ -251,6 +303,7 @@ suite("Retry functionality (Unit)", () => {
 						error.message.includes("Delay must not exceed")
 					);
 				},
+				"should throw RangeError when delay exceeds INT32_MAX",
 			);
 		});
 
@@ -279,6 +332,7 @@ suite("Retry functionality (Unit)", () => {
 						error.message.includes(`${excessiveDelay}`)
 					);
 				},
+				"should include both INT32_MAX and actual delay in error message",
 			);
 		});
 	});
@@ -311,8 +365,16 @@ suite("Retry functionality (Unit)", () => {
 			const result = await promise;
 
 			// Assert
-			ctx.assert.strictEqual(result, "success");
-			ctx.assert.strictEqual(flakeyFn.mock.callCount(), 2);
+			ctx.assert.strictEqual(
+				result,
+				"success",
+				"should return success after delay",
+			);
+			ctx.assert.strictEqual(
+				flakeyFn.mock.callCount(),
+				2,
+				"should retry once with INT32_MAX delay",
+			);
 		});
 	});
 });

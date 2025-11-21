@@ -12,9 +12,21 @@ suite("Zero backoff strategy (Unit)", () => {
 			const backoff = new ZeroBackoff();
 
 			// Act & Assert
-			ctx.assert.strictEqual(backoff.nextBackoff(), 0);
-			ctx.assert.strictEqual(backoff.nextBackoff(), 0);
-			ctx.assert.strictEqual(backoff.nextBackoff(), 0);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms delay",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should continue returning 0ms",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should continue returning 0ms",
+			);
 		});
 	});
 
@@ -26,13 +38,29 @@ suite("Zero backoff strategy (Unit)", () => {
 			const backoff = new ZeroBackoff();
 
 			// Act & Assert
-			ctx.assert.strictEqual(backoff.nextBackoff(), 0);
-			ctx.assert.strictEqual(backoff.nextBackoff(), 0);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms before reset",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should continue returning 0ms before reset",
+			);
 
 			backoff.resetBackoff();
 
-			ctx.assert.strictEqual(backoff.nextBackoff(), 0);
-			ctx.assert.strictEqual(backoff.nextBackoff(), 0);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms after reset",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should continue returning 0ms after reset",
+			);
 		});
 	});
 
@@ -45,13 +73,29 @@ suite("Zero backoff strategy (Unit)", () => {
 			const backoff2 = new ZeroBackoff();
 
 			// Act & Assert
-			ctx.assert.strictEqual(backoff1.nextBackoff(), 0);
-			ctx.assert.strictEqual(backoff2.nextBackoff(), 0);
+			ctx.assert.strictEqual(
+				backoff1.nextBackoff(),
+				0,
+				"should return 0ms from first instance",
+			);
+			ctx.assert.strictEqual(
+				backoff2.nextBackoff(),
+				0,
+				"should return 0ms from second instance",
+			);
 
 			backoff1.resetBackoff();
 
-			ctx.assert.strictEqual(backoff1.nextBackoff(), 0);
-			ctx.assert.strictEqual(backoff2.nextBackoff(), 0);
+			ctx.assert.strictEqual(
+				backoff1.nextBackoff(),
+				0,
+				"should return 0ms from first instance after reset",
+			);
+			ctx.assert.strictEqual(
+				backoff2.nextBackoff(),
+				0,
+				"should not affect second instance",
+			);
 		});
 	});
 });

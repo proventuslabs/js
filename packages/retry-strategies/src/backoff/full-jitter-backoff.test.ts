@@ -5,7 +5,7 @@ import { FullJitterBackoff } from "./full-jitter-backoff.ts";
 /* node:coverage disable */
 suite("Full jitter backoff strategy (Unit)", () => {
 	describe("calculating backoff delays", () => {
-		test("should return random delays within exponential bounds", (ctx: TestContext) => {
+		test("returns random delays within exponential bounds", (ctx: TestContext) => {
 			ctx.plan(5);
 
 			// Arrange
@@ -27,7 +27,7 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 1440);
 		});
 
-		test("should cap maximum delay range", (ctx: TestContext) => {
+		test("caps maximum delay range", (ctx: TestContext) => {
 			ctx.plan(5);
 
 			// Arrange
@@ -42,7 +42,7 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 250); // floor(0.5 * min(500, 1600)) = 250
 		});
 
-		test("should handle zero base delay", (ctx: TestContext) => {
+		test("handles zero base delay", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -54,7 +54,7 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 0); // random(0, 0) = 0
 		});
 
-		test("should handle base equal to cap", (ctx: TestContext) => {
+		test("handles base equal to cap", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -69,7 +69,7 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 100); // floor(0.2 * min(500, 2000))
 		});
 
-		test("should return minimum delay when random returns 0", (ctx: TestContext) => {
+		test("returns minimum delay when random returns 0", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -82,7 +82,7 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 0);
 		});
 
-		test("should return maximum delay when random returns close to 1", (ctx: TestContext) => {
+		test("returns maximum delay when random returns close to 1", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -95,7 +95,7 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 399); // floor(0.999999 * 400)
 		});
 
-		test("should produce variable delays with default Math.random", (ctx: TestContext) => {
+		test("produces variable delays with default Math.random", (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Arrange
@@ -115,7 +115,7 @@ suite("Full jitter backoff strategy (Unit)", () => {
 	});
 
 	describe("resetting state", () => {
-		test("should restart from initial attempt", (ctx: TestContext) => {
+		test("restarts from initial attempt", (ctx: TestContext) => {
 			ctx.plan(6);
 
 			// Arrange
@@ -136,7 +136,7 @@ suite("Full jitter backoff strategy (Unit)", () => {
 	});
 
 	describe("using with different instances", () => {
-		test("should maintain independent state across instances", (ctx: TestContext) => {
+		test("maintains independent state across instances", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Arrange
@@ -156,7 +156,7 @@ suite("Full jitter backoff strategy (Unit)", () => {
 	});
 
 	describe("validating constructor parameters", () => {
-		test("should reject non-integer base values", (ctx: TestContext) => {
+		test("rejects non-integer base values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Act & Assert
@@ -171,14 +171,14 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			);
 		});
 
-		test("should reject negative base", (ctx: TestContext) => {
+		test("rejects negative base", (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Act & Assert
 			ctx.assert.throws(() => new FullJitterBackoff(-100, 1000), RangeError);
 		});
 
-		test("should reject non-integer cap values", (ctx: TestContext) => {
+		test("rejects non-integer cap values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Act & Assert
@@ -193,14 +193,14 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			);
 		});
 
-		test("should reject cap less than base", (ctx: TestContext) => {
+		test("rejects cap less than base", (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Act & Assert
 			ctx.assert.throws(() => new FullJitterBackoff(1000, 500), RangeError);
 		});
 
-		test("should accept valid parameter combinations", (ctx: TestContext) => {
+		test("accepts valid parameter combinations", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Act & Assert

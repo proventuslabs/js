@@ -6,7 +6,7 @@ import { waitFor } from "./wait-for.ts";
 
 suite("Wait for delay (Unit)", () => {
 	describe("delay elapses", () => {
-		test("should resolve after specified delay", async (ctx: TestContext) => {
+		test("resolves after specified delay", async (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Arrange
@@ -24,7 +24,7 @@ suite("Wait for delay (Unit)", () => {
 	});
 
 	describe("signal is aborted", () => {
-		test("should reject with signal reason", async (ctx: TestContext) => {
+		test("rejects with signal reason", async (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Arrange
@@ -44,7 +44,7 @@ suite("Wait for delay (Unit)", () => {
 	});
 
 	describe("delay is negative", () => {
-		test("should resolve immediately", async (ctx: TestContext) => {
+		test("resolves immediately", async (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Arrange

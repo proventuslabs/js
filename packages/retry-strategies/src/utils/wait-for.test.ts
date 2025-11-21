@@ -60,4 +60,63 @@ suite("Wait for delay (Unit)", () => {
 			ctx.assert.ok(true);
 		});
 	});
+
+	describe("delay exceeds INT32_MAX", () => {
+		test("fails immediately", (ctx: TestContext) => {
+			ctx.plan(1);
+
+			// Arrange
+			const INT32_MAX = 2 ** 31 - 1;
+			const delay = INT32_MAX + 1;
+
+			// Act & Assert
+			ctx.assert.throws(
+				() => waitFor(delay),
+				(error: Error) => {
+					return (
+						error instanceof RangeError &&
+						error.message.includes("Delay must not exceed")
+					);
+				},
+			);
+		});
+
+		test("fails with exact value in message", (ctx: TestContext) => {
+			ctx.plan(1);
+
+			// Arrange
+			const INT32_MAX = 2 ** 31 - 1;
+			const delay = 3000000000;
+
+			// Act & Assert
+			ctx.assert.throws(
+				() => waitFor(delay),
+				(error: Error) => {
+					return (
+						error instanceof RangeError &&
+						error.message.includes(`${INT32_MAX}`) &&
+						error.message.includes(`${delay}`)
+					);
+				},
+			);
+		});
+	});
+
+	describe("delay equals INT32_MAX", () => {
+		test("succeeds", async (ctx: TestContext) => {
+			ctx.plan(1);
+
+			// Arrange
+			ctx.mock.timers.enable({ apis: ["setTimeout"] });
+			const INT32_MAX = 2 ** 31 - 1;
+
+			// Act
+			const promise = waitFor(INT32_MAX);
+			ctx.mock.timers.tick(INT32_MAX);
+			await promise;
+
+			// Assert
+			ctx.assert.ok(true);
+		});
+	});
 });

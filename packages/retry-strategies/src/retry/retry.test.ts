@@ -226,4 +226,93 @@ suite("Retry functionality (Unit)", () => {
 			await retry(checkFn, { strategy: mockStrategy });
 		});
 	});
+
+	describe("delay exceeds INT32_MAX", () => {
+		test("fails in waitFor", async (ctx: TestContext) => {
+			ctx.plan(1);
+
+			// Arrange
+			const INT32_MAX = 2 ** 31 - 1;
+			const mockStrategy = {
+				nextBackoff: ctx.mock.fn(() => INT32_MAX + 1),
+				resetBackoff: ctx.mock.fn(),
+			} satisfies BackoffStrategy;
+
+			const failingFn = ctx.mock.fn(() => {
+				throw new Error("Failed");
+			});
+
+			// Act & Assert
+			await ctx.assert.rejects(
+				retry(failingFn, { strategy: mockStrategy }),
+				(error: Error) => {
+					return (
+						error instanceof RangeError &&
+						error.message.includes("Delay must not exceed")
+					);
+				},
+			);
+		});
+
+		test("fails with delay value in message", async (ctx: TestContext) => {
+			ctx.plan(1);
+
+			// Arrange
+			const INT32_MAX = 2 ** 31 - 1;
+			const excessiveDelay = 3000000000;
+			const mockStrategy = {
+				nextBackoff: ctx.mock.fn(() => excessiveDelay),
+				resetBackoff: ctx.mock.fn(),
+			} satisfies BackoffStrategy;
+
+			const failingFn = ctx.mock.fn(() => {
+				throw new Error("Failed");
+			});
+
+			// Act & Assert
+			await ctx.assert.rejects(
+				retry(failingFn, { strategy: mockStrategy }),
+				(error: Error) => {
+					return (
+						error instanceof RangeError &&
+						error.message.includes(`${INT32_MAX}`) &&
+						error.message.includes(`${excessiveDelay}`)
+					);
+				},
+			);
+		});
+	});
+
+	describe("delay equals INT32_MAX", () => {
+		test("does not fail", async (ctx: TestContext) => {
+			ctx.plan(2);
+
+			// Arrange
+			ctx.mock.timers.enable({ apis: ["setTimeout"] });
+			const INT32_MAX = 2 ** 31 - 1;
+			let attemptCount = 0;
+
+			const mockStrategy = {
+				nextBackoff: ctx.mock.fn(() => INT32_MAX),
+				resetBackoff: ctx.mock.fn(),
+			} satisfies BackoffStrategy;
+
+			const flakeyFn = ctx.mock.fn(() => {
+				attemptCount++;
+				if (attemptCount < 2) {
+					throw new Error("Failed");
+				}
+				return "success";
+			});
+
+			// Act
+			const promise = retry(flakeyFn, { strategy: mockStrategy });
+			ctx.mock.timers.tick(INT32_MAX);
+			const result = await promise;
+
+			// Assert
+			ctx.assert.strictEqual(result, "success");
+			ctx.assert.strictEqual(flakeyFn.mock.callCount(), 2);
+		});
+	});
 });

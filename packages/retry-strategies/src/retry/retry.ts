@@ -56,8 +56,9 @@ export type RetryOptions = {
  * @param options.signal - Optional AbortSignal to cancel retries. If aborted, the returned promise is rejected with `signal.reason`.
  * @returns A promise that resolves with the function's result if it eventually succeeds.
  *
- * @throws The last encountered error if retries are exhausted or if the stop function returns `true`.
- * @throws The reason of the AbortSignal if the operation is aborted.
+ * @throws {unknown} The last encountered error if retries are exhausted or if the stop function returns `true`.
+ * @throws {unknown} The reason of the AbortSignal if the operation is aborted (generally {@link DOMException} `AbortError`).
+ * @throws {RangeError} If the backoff strategy returns a delay exceeding INT32_MAX (2147483647ms, approximately 24.8 days).
  *
  * @example
  * ```ts

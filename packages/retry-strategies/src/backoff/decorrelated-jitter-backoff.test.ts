@@ -1,11 +1,11 @@
-import { describe, it, type TestContext } from "node:test";
+import { describe, suite, type TestContext, test } from "node:test";
 
 import { DecorrelatedJitterBackoff } from "./decorrelated-jitter-backoff.ts";
 
 /* node:coverage disable */
-describe("DecorrelatedJitterBackoff - Unit tests", () => {
-	describe("when calculating backoff delays", () => {
-		it("should return delays based on previous delay", (ctx: TestContext) => {
+suite("Decorrelated jitter backoff strategy (Unit)", () => {
+	describe("calculating backoff delays", () => {
+		test("should return delays based on previous delay", (ctx: TestContext) => {
 			ctx.plan(5);
 
 			// Arrange
@@ -27,7 +27,7 @@ describe("DecorrelatedJitterBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 477);
 		});
 
-		it("should cap maximum delay", (ctx: TestContext) => {
+		test("should cap maximum delay", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Arrange
@@ -47,7 +47,7 @@ describe("DecorrelatedJitterBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 500);
 		});
 
-		it("should handle zero base delay", (ctx: TestContext) => {
+		test("should handle zero base delay", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -65,7 +65,7 @@ describe("DecorrelatedJitterBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 0);
 		});
 
-		it("should handle base equal to cap", (ctx: TestContext) => {
+		test("should handle base equal to cap", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -81,7 +81,7 @@ describe("DecorrelatedJitterBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 500);
 		});
 
-		it("should return minimum delay when random returns 0", (ctx: TestContext) => {
+		test("should return minimum delay when random returns 0", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -97,7 +97,7 @@ describe("DecorrelatedJitterBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 100);
 		});
 
-		it("should return maximum in range when random returns close to 1", (ctx: TestContext) => {
+		test("should return maximum in range when random returns close to 1", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -113,7 +113,7 @@ describe("DecorrelatedJitterBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 2687);
 		});
 
-		it("should produce variable delays with default Math.random", (ctx: TestContext) => {
+		test("should produce variable delays with default Math.random", (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Arrange
@@ -131,7 +131,7 @@ describe("DecorrelatedJitterBackoff - Unit tests", () => {
 			ctx.assert.ok(delays[0] >= 100 && delays[0] < 300);
 		});
 
-		it("should decorrelate delays making them unpredictable", (ctx: TestContext) => {
+		test("should decorrelate delays making them unpredictable", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Arrange
@@ -154,8 +154,8 @@ describe("DecorrelatedJitterBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when resetting state", () => {
-		it("should restart from base delay", (ctx: TestContext) => {
+	describe("resetting state", () => {
+		test("should restart from base delay", (ctx: TestContext) => {
 			ctx.plan(6);
 
 			// Arrange
@@ -183,8 +183,8 @@ describe("DecorrelatedJitterBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when using with different instances", () => {
-		it("should maintain independent state across instances", (ctx: TestContext) => {
+	describe("using with different instances", () => {
+		test("should maintain independent state across instances", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Arrange
@@ -207,8 +207,8 @@ describe("DecorrelatedJitterBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when validating constructor parameters", () => {
-		it("should reject non-integer base values", (ctx: TestContext) => {
+	describe("validating constructor parameters", () => {
+		test("should reject non-integer base values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Act & Assert
@@ -226,7 +226,7 @@ describe("DecorrelatedJitterBackoff - Unit tests", () => {
 			);
 		});
 
-		it("should reject negative base", (ctx: TestContext) => {
+		test("should reject negative base", (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Act & Assert
@@ -236,7 +236,7 @@ describe("DecorrelatedJitterBackoff - Unit tests", () => {
 			);
 		});
 
-		it("should reject non-integer cap values", (ctx: TestContext) => {
+		test("should reject non-integer cap values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Act & Assert
@@ -254,7 +254,7 @@ describe("DecorrelatedJitterBackoff - Unit tests", () => {
 			);
 		});
 
-		it("should reject cap less than base", (ctx: TestContext) => {
+		test("should reject cap less than base", (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Act & Assert
@@ -264,7 +264,7 @@ describe("DecorrelatedJitterBackoff - Unit tests", () => {
 			);
 		});
 
-		it("should accept valid parameter combinations", (ctx: TestContext) => {
+		test("should accept valid parameter combinations", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Act & Assert

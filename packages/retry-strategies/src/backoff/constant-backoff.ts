@@ -14,9 +14,7 @@ export class ConstantBackoff implements BackoffStrategy {
 	 */
 	public constructor(delay: number) {
 		if (!Number.isSafeInteger(delay)) {
-			throw new RangeError(
-				`Delay must be a safe integer, received: ${delay}`,
-			);
+			throw new RangeError(`Delay must be a safe integer, received: ${delay}`);
 		}
 		if (delay < 0) {
 			throw new RangeError(`Delay must be 0 or greater, received: ${delay}`);

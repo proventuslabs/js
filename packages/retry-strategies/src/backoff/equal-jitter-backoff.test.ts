@@ -1,11 +1,11 @@
-import { describe, it, type TestContext } from "node:test";
+import { describe, suite, type TestContext, test } from "node:test";
 
 import { EqualJitterBackoff } from "./equal-jitter-backoff.ts";
 
 /* node:coverage disable */
-describe("EqualJitterBackoff - Unit tests", () => {
-	describe("when calculating backoff delays", () => {
-		it("should return delays that are half deterministic and half random", (ctx: TestContext) => {
+suite("Equal jitter backoff strategy (Unit)", () => {
+	describe("calculating backoff delays", () => {
+		test("should return delays that are half deterministic and half random", (ctx: TestContext) => {
 			ctx.plan(5);
 
 			// Arrange
@@ -27,7 +27,7 @@ describe("EqualJitterBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 1520);
 		});
 
-		it("should cap maximum delay range", (ctx: TestContext) => {
+		test("should cap maximum delay range", (ctx: TestContext) => {
 			ctx.plan(5);
 
 			// Arrange
@@ -42,7 +42,7 @@ describe("EqualJitterBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 375); // temp=min(500,1600)=500: 250 + floor(0.5 * 250) = 375
 		});
 
-		it("should handle zero base delay", (ctx: TestContext) => {
+		test("should handle zero base delay", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -54,7 +54,7 @@ describe("EqualJitterBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 0); // temp=0: 0 + floor(random * 0) = 0
 		});
 
-		it("should handle base equal to cap", (ctx: TestContext) => {
+		test("should handle base equal to cap", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -69,7 +69,7 @@ describe("EqualJitterBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 300); // temp=min(500,2000)=500: 250 + floor(0.2 * 250) = 300
 		});
 
-		it("should return minimum delay when random returns 0", (ctx: TestContext) => {
+		test("should return minimum delay when random returns 0", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -82,7 +82,7 @@ describe("EqualJitterBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 200); // temp=400: 200 + floor(0 * 200) = 200
 		});
 
-		it("should return maximum delay when random returns close to 1", (ctx: TestContext) => {
+		test("should return maximum delay when random returns close to 1", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -95,7 +95,7 @@ describe("EqualJitterBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 399); // temp=400: 200 + floor(0.999999 * 200) = 399
 		});
 
-		it("should produce variable delays with default Math.random", (ctx: TestContext) => {
+		test("should produce variable delays with default Math.random", (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Arrange
@@ -114,8 +114,8 @@ describe("EqualJitterBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when resetting state", () => {
-		it("should restart from initial attempt", (ctx: TestContext) => {
+	describe("resetting state", () => {
+		test("should restart from initial attempt", (ctx: TestContext) => {
 			ctx.plan(6);
 
 			// Arrange
@@ -135,8 +135,8 @@ describe("EqualJitterBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when using with different instances", () => {
-		it("should maintain independent state across instances", (ctx: TestContext) => {
+	describe("using with different instances", () => {
+		test("should maintain independent state across instances", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Arrange
@@ -155,8 +155,8 @@ describe("EqualJitterBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when validating constructor parameters", () => {
-		it("should reject non-integer base values", (ctx: TestContext) => {
+	describe("validating constructor parameters", () => {
+		test("should reject non-integer base values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Act & Assert
@@ -171,14 +171,14 @@ describe("EqualJitterBackoff - Unit tests", () => {
 			);
 		});
 
-		it("should reject negative base", (ctx: TestContext) => {
+		test("should reject negative base", (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Act & Assert
 			ctx.assert.throws(() => new EqualJitterBackoff(-100, 1000), RangeError);
 		});
 
-		it("should reject non-integer cap values", (ctx: TestContext) => {
+		test("should reject non-integer cap values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Act & Assert
@@ -193,14 +193,14 @@ describe("EqualJitterBackoff - Unit tests", () => {
 			);
 		});
 
-		it("should reject cap less than base", (ctx: TestContext) => {
+		test("should reject cap less than base", (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Act & Assert
 			ctx.assert.throws(() => new EqualJitterBackoff(1000, 500), RangeError);
 		});
 
-		it("should accept valid parameter combinations", (ctx: TestContext) => {
+		test("should accept valid parameter combinations", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Act & Assert

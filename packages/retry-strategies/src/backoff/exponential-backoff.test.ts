@@ -1,11 +1,11 @@
-import { describe, it, type TestContext } from "node:test";
+import { describe, suite, type TestContext, test } from "node:test";
 
 import { ExponentialBackoff } from "./exponential-backoff.ts";
 
 /* node:coverage disable */
-describe("ExponentialBackoff - Unit tests", () => {
-	describe("when calculating backoff delays", () => {
-		it("should increase delay exponentially following AWS algorithm", (ctx: TestContext) => {
+suite("Exponential backoff strategy (Unit)", () => {
+	describe("delay generation", () => {
+		test("increases delay exponentially", (ctx: TestContext) => {
 			ctx.plan(6);
 
 			// Arrange
@@ -21,7 +21,7 @@ describe("ExponentialBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 3200); // 100 * 2^5 = 3200
 		});
 
-		it("should cap delay at maximum value", (ctx: TestContext) => {
+		test("caps delay at maximum value", (ctx: TestContext) => {
 			ctx.plan(5);
 
 			// Arrange
@@ -35,7 +35,7 @@ describe("ExponentialBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 500); // min(500, 1600) = 500
 		});
 
-		it("should handle zero base delay", (ctx: TestContext) => {
+		test("handles zero base delay", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -47,7 +47,7 @@ describe("ExponentialBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 0); // 0 * 2^2 = 0
 		});
 
-		it("should handle base equal to cap", (ctx: TestContext) => {
+		test("handles base equal to cap", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -60,8 +60,8 @@ describe("ExponentialBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when resetting state", () => {
-		it("should restart exponential progression from base delay", (ctx: TestContext) => {
+	describe("strategy reset", () => {
+		test("restarts progression from base delay", (ctx: TestContext) => {
 			ctx.plan(6);
 
 			// Arrange
@@ -80,8 +80,8 @@ describe("ExponentialBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when using with different instances", () => {
-		it("should maintain independent state across instances", (ctx: TestContext) => {
+	describe("multiple instances", () => {
+		test("maintains independent state", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Arrange
@@ -96,8 +96,8 @@ describe("ExponentialBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when validating constructor parameters", () => {
-		it("should reject non-integer base values", (ctx: TestContext) => {
+	describe("parameter validation", () => {
+		test("rejects non-integer base values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Act & Assert
@@ -112,14 +112,14 @@ describe("ExponentialBackoff - Unit tests", () => {
 			);
 		});
 
-		it("should reject negative base", (ctx: TestContext) => {
+		test("rejects negative base", (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Act & Assert
 			ctx.assert.throws(() => new ExponentialBackoff(-100, 1000), RangeError);
 		});
 
-		it("should reject non-integer cap values", (ctx: TestContext) => {
+		test("rejects non-integer cap values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Act & Assert
@@ -134,14 +134,14 @@ describe("ExponentialBackoff - Unit tests", () => {
 			);
 		});
 
-		it("should reject cap less than base", (ctx: TestContext) => {
+		test("rejects cap less than base", (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Act & Assert
 			ctx.assert.throws(() => new ExponentialBackoff(1000, 500), RangeError);
 		});
 
-		it("should accept valid parameter combinations", (ctx: TestContext) => {
+		test("accepts valid parameter combinations", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Act & Assert

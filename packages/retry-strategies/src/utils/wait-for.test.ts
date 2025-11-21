@@ -1,12 +1,12 @@
-import { describe, it, type TestContext } from "node:test";
+import { describe, suite, type TestContext, test } from "node:test";
 
 import { waitFor } from "./wait-for.ts";
 
 /* node:coverage disable */
 
-describe("waitFor - Unit tests", () => {
-	describe("when delay elapses", () => {
-		it("should resolve after specified delay", async (ctx: TestContext) => {
+suite("Wait for delay (Unit)", () => {
+	describe("delay elapses", () => {
+		test("should resolve after specified delay", async (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Arrange
@@ -23,8 +23,8 @@ describe("waitFor - Unit tests", () => {
 		});
 	});
 
-	describe("when signal is aborted", () => {
-		it("should reject with signal reason", async (ctx: TestContext) => {
+	describe("signal is aborted", () => {
+		test("should reject with signal reason", async (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Arrange
@@ -43,8 +43,8 @@ describe("waitFor - Unit tests", () => {
 		});
 	});
 
-	describe("when delay is negative", () => {
-		it("should resolve immediately", async (ctx: TestContext) => {
+	describe("delay is negative", () => {
+		test("should resolve immediately", async (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Arrange

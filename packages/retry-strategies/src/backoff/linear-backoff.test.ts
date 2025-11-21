@@ -1,11 +1,11 @@
-import { describe, it, type TestContext } from "node:test";
+import { describe, suite, type TestContext, test } from "node:test";
 
 import { LinearBackoff } from "./linear-backoff.ts";
 
 /* node:coverage disable */
-describe("LinearBackoff - Unit tests", () => {
-	describe("when calculating backoff delays", () => {
-		it("should increase delay linearly with default initial delay", (ctx: TestContext) => {
+suite("Linear backoff strategy (Unit)", () => {
+	describe("delay generation", () => {
+		test("increases delay linearly with default initial delay", (ctx: TestContext) => {
 			ctx.plan(5);
 
 			// Arrange
@@ -19,7 +19,7 @@ describe("LinearBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 400);
 		});
 
-		it("should increase delay linearly with custom initial delay", (ctx: TestContext) => {
+		test("increases delay linearly with custom initial delay", (ctx: TestContext) => {
 			ctx.plan(5);
 
 			// Arrange
@@ -33,7 +33,7 @@ describe("LinearBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 300);
 		});
 
-		it("should behave like constant backoff when increment is zero", (ctx: TestContext) => {
+		test("behaves like constant backoff with zero increment", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -46,8 +46,8 @@ describe("LinearBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when resetting state", () => {
-		it("should restart linear progression from initial delay", (ctx: TestContext) => {
+	describe("strategy reset", () => {
+		test("restarts progression from initial delay", (ctx: TestContext) => {
 			ctx.plan(6);
 
 			// Arrange
@@ -66,8 +66,8 @@ describe("LinearBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when using with different instances", () => {
-		it("should maintain independent state across instances", (ctx: TestContext) => {
+	describe("multiple instances", () => {
+		test("maintains independent state", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Arrange
@@ -82,8 +82,8 @@ describe("LinearBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when validating constructor parameters", () => {
-		it("should reject non-integer increment values", (ctx: TestContext) => {
+	describe("parameter validation", () => {
+		test("rejects non-integer increment values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Act & Assert
@@ -95,14 +95,14 @@ describe("LinearBackoff - Unit tests", () => {
 			);
 		});
 
-		it("should reject negative increment", (ctx: TestContext) => {
+		test("rejects negative increment", (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Act & Assert
 			ctx.assert.throws(() => new LinearBackoff(-100), RangeError);
 		});
 
-		it("should reject non-integer initial delay values", (ctx: TestContext) => {
+		test("rejects non-integer initial delay values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Act & Assert
@@ -114,14 +114,14 @@ describe("LinearBackoff - Unit tests", () => {
 			);
 		});
 
-		it("should reject negative initial delay", (ctx: TestContext) => {
+		test("rejects negative initial delay", (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Act & Assert
 			ctx.assert.throws(() => new LinearBackoff(100, -50), RangeError);
 		});
 
-		it("should accept valid parameter combinations", (ctx: TestContext) => {
+		test("accepts valid parameter combinations", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Act & Assert

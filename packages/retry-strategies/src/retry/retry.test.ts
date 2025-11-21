@@ -1,13 +1,13 @@
-import { describe, it, type TestContext } from "node:test";
+import { describe, suite, type TestContext, test } from "node:test";
 
 import type { BackoffStrategy } from "../backoff/interface.ts";
 import { retry } from "./retry.ts";
 
 /* node:coverage disable */
 
-describe("retry - Unit tests", () => {
-	describe("when function succeeds", () => {
-		it("should return result without retrying", async (ctx: TestContext) => {
+suite("Retry functionality (Unit)", () => {
+	describe("successful operation", () => {
+		test("returns result without retrying", async (ctx: TestContext) => {
 			ctx.plan(2);
 
 			// Arrange
@@ -27,8 +27,8 @@ describe("retry - Unit tests", () => {
 		});
 	});
 
-	describe("when function fails", () => {
-		it("should retry until succeeds", async (ctx: TestContext) => {
+	describe("transient failures", () => {
+		test("retries until successful", async (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -56,8 +56,8 @@ describe("retry - Unit tests", () => {
 		});
 	});
 
-	describe("when strategy signals to stop", () => {
-		it("should throw error when nextBackoff returns NaN", async (ctx: TestContext) => {
+	describe("strategy exhaustion", () => {
+		test("throws the last error", async (ctx: TestContext) => {
 			ctx.plan(2);
 
 			// Arrange
@@ -83,8 +83,8 @@ describe("retry - Unit tests", () => {
 		});
 	});
 
-	describe("when exit function is provided", () => {
-		it("should stop when exit returns true", async (ctx: TestContext) => {
+	describe("stop condition", () => {
+		test("stops retrying and throws error", async (ctx: TestContext) => {
 			ctx.plan(2);
 
 			// Arrange
@@ -111,7 +111,7 @@ describe("retry - Unit tests", () => {
 			ctx.assert.strictEqual(failingFn.mock.callCount(), 2);
 		});
 
-		it("should continue when exit returns false", async (ctx: TestContext) => {
+		test("continues retrying until condition met", async (ctx: TestContext) => {
 			ctx.plan(2);
 
 			// Arrange
@@ -142,7 +142,7 @@ describe("retry - Unit tests", () => {
 			ctx.assert.strictEqual(exitFn.mock.callCount(), 2);
 		});
 
-		it("should pass the correct attempt index to stop", async (ctx: TestContext) => {
+		test("provides attempt index to stop function", async (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -173,8 +173,8 @@ describe("retry - Unit tests", () => {
 		});
 	});
 
-	describe("when AbortSignal is provided", () => {
-		it("should abort with signal reason", async (ctx: TestContext) => {
+	describe("operation abortion", () => {
+		test("rejects with abort reason", async (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Arrange
@@ -204,8 +204,8 @@ describe("retry - Unit tests", () => {
 		});
 	});
 
-	describe("when resetting strategy", () => {
-		it("should reset strategy before first attempt", async (ctx: TestContext) => {
+	describe("strategy initialization", () => {
+		test("resets strategy state before first attempt", async (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Arrange

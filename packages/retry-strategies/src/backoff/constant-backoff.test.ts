@@ -1,11 +1,11 @@
-import { describe, it, type TestContext } from "node:test";
+import { describe, suite, type TestContext, test } from "node:test";
 
 import { ConstantBackoff } from "./constant-backoff.ts";
 
 /* node:coverage disable */
-describe("ConstantBackoff - Unit tests", () => {
-	describe("when calculating backoff delays", () => {
-		it("should always return the configured delay", (ctx: TestContext) => {
+suite("Constant backoff strategy (Unit)", () => {
+	describe("delay generation", () => {
+		test("returns the same delay on every call", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -17,7 +17,7 @@ describe("ConstantBackoff - Unit tests", () => {
 			ctx.assert.strictEqual(backoff.nextBackoff(), 1000);
 		});
 
-		it("should support different delay values", (ctx: TestContext) => {
+		test("supports different delay values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange & Act & Assert
@@ -32,8 +32,8 @@ describe("ConstantBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when resetting state", () => {
-		it("should continue returning the same delay after reset", (ctx: TestContext) => {
+	describe("strategy reset", () => {
+		test("continues returning the same delay", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Arrange
@@ -50,8 +50,8 @@ describe("ConstantBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when using with different instances", () => {
-		it("should maintain independent configurations", (ctx: TestContext) => {
+	describe("multiple instances", () => {
+		test("maintains independent configurations", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Arrange
@@ -69,8 +69,8 @@ describe("ConstantBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when validating delay parameter", () => {
-		it("should reject non-integer delay values", (ctx: TestContext) => {
+	describe("parameter validation", () => {
+		test("rejects non-integer delay values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Act & Assert
@@ -82,14 +82,14 @@ describe("ConstantBackoff - Unit tests", () => {
 			);
 		});
 
-		it("should reject negative delays", (ctx: TestContext) => {
+		test("rejects negative delays", (ctx: TestContext) => {
 			ctx.plan(1);
 
 			// Act & Assert
 			ctx.assert.throws(() => new ConstantBackoff(-100), RangeError);
 		});
 
-		it("should accept valid delay values", (ctx: TestContext) => {
+		test("accepts valid delay values", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Act & Assert

@@ -1,11 +1,11 @@
-import { describe, it, type TestContext } from "node:test";
+import { describe, suite, type TestContext, test } from "node:test";
 
 import { ZeroBackoff } from "./zero-backoff.ts";
 
 /* node:coverage disable */
-describe("ZeroBackoff - Unit tests", () => {
-	describe("when calculating backoff delays", () => {
-		it("should always return zero milliseconds", (ctx: TestContext) => {
+suite("Zero backoff strategy (Unit)", () => {
+	describe("delay generation", () => {
+		test("always returns zero milliseconds", (ctx: TestContext) => {
 			ctx.plan(3);
 
 			// Arrange
@@ -18,8 +18,8 @@ describe("ZeroBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when resetting state", () => {
-		it("should continue returning zero after reset", (ctx: TestContext) => {
+	describe("strategy reset", () => {
+		test("continues returning zero after reset", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Arrange
@@ -36,8 +36,8 @@ describe("ZeroBackoff - Unit tests", () => {
 		});
 	});
 
-	describe("when using with different instances", () => {
-		it("should maintain independent behavior", (ctx: TestContext) => {
+	describe("multiple instances", () => {
+		test("maintains independent behavior", (ctx: TestContext) => {
 			ctx.plan(4);
 
 			// Arrange

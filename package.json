@@ -23,6 +23,7 @@
 		"style": "turbo style",
 		"test": "turbo test",
 		"test:e2e": "turbo test:e2e",
+		"test:integration": "turbo test:integration",
 		"test:unit": "turbo test:unit"
 	}
 }

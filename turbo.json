@@ -14,11 +14,14 @@
 		"test": {
 			"dependsOn": ["^test"]
 		},
-		"test:e2e": {
-			"dependsOn": ["^test:e2e"]
-		},
 		"test:unit": {
 			"dependsOn": ["^test:unit"]
+		},
+		"test:integration": {
+			"dependsOn": ["^test:integration"]
+		},
+		"test:e2e": {
+			"dependsOn": ["^test:e2e"]
 		}
 	}
 }

@@ -139,19 +139,15 @@ Tests use Node.js test runner with native TypeScript transpilation.
 ## Automation & Release Process
 
 ### Automated CI/CD Pipeline
-The project uses a comprehensive automation setup:
 
 **CI (Continuous Integration):**
-- Triggered on PRs targeting `main` branch
-- Centralized CI workflow (`packages.ci.yaml`) detects changed packages and runs CI for each
-- Uses template workflow (`_template.package-ci.yaml`) for consistency across packages
-- Turbo cache optimization for faster builds
+- Runs on PRs targeting `main`, detecting changed packages via centralized workflow
+- Uses template workflow for consistency and Turbo cache optimization
 
 **CD (Continuous Deployment):**
-- Fully automated via `release-please` on merge to `main`
+- Automated via `release-please` on merge to `main`
+- Publishes to NPM and JSR registries using OIDC (no stored secrets)
 - Creates release PRs with conventional commit-based changelog
-- Publishes to both NPM and JSR registries automatically
-- Uploads build artifacts to GitHub releases
 
 ### Adding New Packages
 
@@ -223,8 +219,6 @@ pnpm generate  # Creates package from turbo templates
        package_path: "packages/<package name>"
        package_name: "@proventuslabs/<package name>"
        package_tag: ${{ needs.release-please.outputs['packages/<package name>--tag_name'] }}
-     secrets:
-       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
    ```
 
 ### Commit Requirements

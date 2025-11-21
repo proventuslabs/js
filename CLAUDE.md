@@ -223,8 +223,6 @@ pnpm generate  # Creates package from turbo templates
        package_path: "packages/<package name>"
        package_name: "@proventuslabs/<package name>"
        package_tag: ${{ needs.release-please.outputs['packages/<package name>--tag_name'] }}
-     secrets:
-       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
    ```
 
 ### Commit Requirements

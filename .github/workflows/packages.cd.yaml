@@ -22,7 +22,6 @@ jobs:
       # "packages/<package name>--release_created": ${{ steps.release.outputs['packages/<package name>--release_created'] }}
       "packages/retry-strategies--tag_name": ${{ steps.release.outputs['packages/retry-strategies--tag_name'] }}
       "packages/retry-strategies--release_created": ${{ steps.release.outputs['packages/retry-strategies--release_created'] }}
-      "empty": "empty"
 
     steps:
       - uses: googleapis/release-please-action@v4
@@ -46,8 +45,6 @@ jobs:
       package_path: "packages/retry-strategies"
       package_name: "@proventuslabs/retry-strategies"
       package_tag: ${{ needs.release-please.outputs['packages/retry-strategies--tag_name'] }}
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   # <package name>:
   #   name: <package name>

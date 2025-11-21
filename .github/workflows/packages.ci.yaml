@@ -18,7 +18,6 @@ jobs:
     outputs:
       # "packages/<package name>": ${{ steps.filter.outputs['packages/<package name>'] }}
       "packages/retry-strategies": ${{ steps.filter.outputs['packages/retry-strategies'] }}
-      "empty": "empty"
 
     steps:
       - name: Checkout code

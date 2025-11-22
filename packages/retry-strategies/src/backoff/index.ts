@@ -2,6 +2,7 @@ export * from "./constant-backoff.ts";
 export * from "./decorrelated-jitter-backoff.ts";
 export * from "./equal-jitter-backoff.ts";
 export * from "./exponential-backoff.ts";
+export * from "./fibonacci-backoff.ts";
 export * from "./full-jitter-backoff.ts";
 export * from "./interface.ts";
 export * from "./linear-backoff.ts";

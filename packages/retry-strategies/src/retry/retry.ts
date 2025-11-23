@@ -76,7 +76,7 @@ export type RetryOptions = {
  * ```
  */
 export const retry = async <T = unknown>(
-	fn: () => T | PromiseLike<T>,
+	fn: () => T | Promise<T>,
 	{ strategy, stop, signal }: RetryOptions,
 ): Promise<T> => {
 	// Reset when we start
@@ -85,7 +85,7 @@ export const retry = async <T = unknown>(
 	let attempt = 0;
 	while (true) {
 		try {
-			return fn();
+			return await fn();
 		} catch (error) {
 			// Get next delay
 			const delay = strategy.nextBackoff();

@@ -72,7 +72,7 @@ Attempts to execute a function repeatedly according to a backoff strategy until 
 
 #### Parameters
 
-- **`fn`** `() => T | PromiseLike<T>` - The function to retry. Can be synchronous or return a promise.
+- **`fn`** `() => T | Promise<T>` - The function to retry. Can be synchronous or return a promise.
 - **`options`** `RetryOptions` - Configuration options:
   - **`strategy`** `BackoffStrategy` - Strategy for calculating delays between retries (required)
   - **`stop`** `(error: unknown, attempt: number) => boolean` - Optional function to determine whether to stop retrying. Return `true` to stop. (default: `() => false`)
@@ -103,6 +103,7 @@ Waits for the specified amount of time or until an optional AbortSignal is trigg
 
 #### Throws
 
+- **`unknown`** - The reason of the AbortSignal if the operation is aborted (generally `DOMException` `AbortError`)
 - **`RangeError`** - If the delay exceeds INT32_MAX (2147483647ms, approximately 24.8 days)
 
 ### `BackoffStrategy` Interface

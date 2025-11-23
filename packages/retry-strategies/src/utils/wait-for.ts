@@ -11,6 +11,7 @@ export const INT32_MAX = 0x7fffffff;
  * @param signal - Optional AbortSignal to cancel the wait. If the signal is aborted, the returned promise is rejected with `signal.reason`.
  * @returns A promise that resolves after the delay has elapsed or rejects if the signal is aborted.
  *
+ * @throws {unknown} The reason of the AbortSignal if the operation is aborted (generally {@link DOMException} `AbortError`).
  * @throws {RangeError} If the delay exceeds INT32_MAX (2147483647ms, approximately 24.8 days).
  *
  * @example
@@ -31,6 +32,8 @@ export const waitFor = (delay: number, signal?: AbortSignal): Promise<void> => {
 			`Delay must not exceed INT32_MAX: expected up to ${INT32_MAX}, received ${delay}`,
 		);
 	}
+
+	if (signal?.aborted === true) return Promise.reject(signal.reason);
 
 	return new Promise<void>((resolve, reject) => {
 		const timer = setTimeout(() => {

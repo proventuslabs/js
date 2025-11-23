@@ -42,6 +42,25 @@ suite("Wait for delay (Unit)", () => {
 				"should reject with abort reason",
 			);
 		});
+
+		test("rejects immediately when signal already aborted", async (ctx: TestContext) => {
+			ctx.plan(1);
+
+			// Arrange
+			const controller = new AbortController();
+			const reason = new Error("Already aborted");
+			controller.abort(reason);
+
+			// Act
+			const promise = waitFor(5000, controller.signal);
+
+			// Assert
+			await ctx.assert.rejects(
+				promise,
+				(error: Error) => error.message === "Already aborted",
+				"should reject immediately with abort reason",
+			);
+		});
 	});
 
 	describe("delay is negative", () => {

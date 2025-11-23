@@ -157,10 +157,13 @@ pnpm generate  # Creates package from turbo templates
 ```
 
 **Manual Configuration Required:**
-1. **JSR Package Scope** (One-time setup by @proventuslabs org owner):
-   - **IMPORTANT**: Before publishing, an owner of the `@proventuslabs` organization on JSR must create the package scope
-   - Navigate to JSR and create the package: `@proventuslabs/<package-name>`
-   - This step is required or the automated publishing will fail
+1. **Package publishing** (_IMPORTANT_ one-time setup by @proventuslabs org owner):
+   a) An owner of the `@proventuslabs` organization on JSR must:
+    - Create the package `@proventuslabs/<package-name>` in the scope
+    - Link the GitHub Repository for OIDC publishing in the package settings
+   b) An owner of the `@proventuslabs` organization on NPM must:
+    - Create the package scope by publishing the empty package under `0.0.0-reserved.0` tag
+    - Link the GitHub Repository (Trusted Publisher) for OIDC publishing in the package settings
 
 2. **Release Configuration** (`release-please-config.json`):
    ```json
@@ -198,6 +201,12 @@ pnpm generate  # Creates package from turbo templates
      uses: ./.github/workflows/_template.package-ci.yaml
      with:
        package-name: <package-name>
+   ```
+
+   Add scope to PR validation (`.github/workflows/pr-validation.yaml`):
+   ```yaml
+   scopes: |
+     <package-name>
    ```
 
 4. **CD Workflow** (`.github/workflows/packages.cd.yaml`):

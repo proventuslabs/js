@@ -361,7 +361,11 @@ suite("Full jitter backoff strategy (Unit)", () => {
 				"should accept fractional cap",
 			);
 			ctx.assert.doesNotThrow(
-				() => new FullJitterBackoff(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY),
+				() =>
+					new FullJitterBackoff(
+						Number.POSITIVE_INFINITY,
+						Number.POSITIVE_INFINITY,
+					),
 				"should accept Infinity base",
 			);
 			ctx.assert.doesNotThrow(

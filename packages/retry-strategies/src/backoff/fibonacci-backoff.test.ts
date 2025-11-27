@@ -353,7 +353,11 @@ suite("Fibonacci backoff strategy (Unit)", () => {
 				"should accept fractional cap",
 			);
 			ctx.assert.doesNotThrow(
-				() => new FibonacciBackoff(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY),
+				() =>
+					new FibonacciBackoff(
+						Number.POSITIVE_INFINITY,
+						Number.POSITIVE_INFINITY,
+					),
 				"should accept Infinity base",
 			);
 			ctx.assert.doesNotThrow(

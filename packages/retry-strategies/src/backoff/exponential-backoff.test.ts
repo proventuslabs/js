@@ -288,7 +288,11 @@ suite("Exponential backoff strategy (Unit)", () => {
 				"should accept fractional cap",
 			);
 			ctx.assert.doesNotThrow(
-				() => new ExponentialBackoff(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY),
+				() =>
+					new ExponentialBackoff(
+						Number.POSITIVE_INFINITY,
+						Number.POSITIVE_INFINITY,
+					),
 				"should accept Infinity base",
 			);
 			ctx.assert.doesNotThrow(

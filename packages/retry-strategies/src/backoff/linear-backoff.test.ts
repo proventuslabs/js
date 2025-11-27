@@ -195,11 +195,7 @@ suite("Linear backoff strategy (Unit)", () => {
 				400,
 				"should reach cap exactly",
 			);
-			ctx.assert.strictEqual(
-				backoff.nextBackoff(),
-				400,
-				"should stay at cap",
-			);
+			ctx.assert.strictEqual(backoff.nextBackoff(), 400, "should stay at cap");
 		});
 	});
 
@@ -268,11 +264,7 @@ suite("Linear backoff strategy (Unit)", () => {
 				200,
 				"should cap at maximum",
 			);
-			ctx.assert.strictEqual(
-				backoff.nextBackoff(),
-				200,
-				"should stay at cap",
-			);
+			ctx.assert.strictEqual(backoff.nextBackoff(), 200, "should stay at cap");
 
 			// Reset
 			backoff.resetBackoff();
@@ -426,7 +418,12 @@ suite("Linear backoff strategy (Unit)", () => {
 				"should accept Infinity increment",
 			);
 			ctx.assert.doesNotThrow(
-				() => new LinearBackoff(100, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY),
+				() =>
+					new LinearBackoff(
+						100,
+						Number.POSITIVE_INFINITY,
+						Number.POSITIVE_INFINITY,
+					),
 				"should accept Infinity initial delay",
 			);
 			ctx.assert.doesNotThrow(

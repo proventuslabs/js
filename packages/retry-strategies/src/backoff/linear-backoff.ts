@@ -14,20 +14,18 @@ export class LinearBackoff implements BackoffStrategy {
 	/**
 	 * Creates a new LinearBackoff instance.
 	 *
-	 * @param increment - The amount to increase the delay by on each retry (must be a safe integer >= 0)
-	 * @param initialDelay - The initial delay in milliseconds before any increments (must be a safe integer >= 0, defaults to 0)
-	 * @param cap - The maximum delay in milliseconds (must be a safe integer >= initialDelay, defaults to MAX_SAFE_INTEGER)
-	 * @throws {RangeError} If increment, initialDelay, or cap is not a safe integer or is invalid
+	 * @param increment - The amount to increase the delay by on each retry (must be >= 0)
+	 * @param initialDelay - The initial delay in milliseconds before any increments (must be >= 0, defaults to 0)
+	 * @param cap - The maximum delay in milliseconds (must be >= initialDelay, defaults to Infinity)
+	 * @throws {RangeError} If increment, initialDelay, or cap is NaN or invalid
 	 */
 	public constructor(
 		increment: number,
 		initialDelay = 0,
-		cap: number = Number.MAX_SAFE_INTEGER,
+		cap: number = Number.POSITIVE_INFINITY,
 	) {
-		if (!Number.isSafeInteger(increment)) {
-			throw new RangeError(
-				`Increment must be a safe integer, received: ${increment}`,
-			);
+		if (Number.isNaN(increment)) {
+			throw new RangeError(`Increment must not be NaN`);
 		}
 		if (increment < 0) {
 			throw new RangeError(
@@ -35,10 +33,8 @@ export class LinearBackoff implements BackoffStrategy {
 			);
 		}
 
-		if (!Number.isSafeInteger(initialDelay)) {
-			throw new RangeError(
-				`Initial delay must be a safe integer, received: ${initialDelay}`,
-			);
+		if (Number.isNaN(initialDelay)) {
+			throw new RangeError(`Initial delay must not be NaN`);
 		}
 		if (initialDelay < 0) {
 			throw new RangeError(
@@ -46,8 +42,8 @@ export class LinearBackoff implements BackoffStrategy {
 			);
 		}
 
-		if (!Number.isSafeInteger(cap)) {
-			throw new RangeError(`Cap must be a safe integer, received: ${cap}`);
+		if (Number.isNaN(cap)) {
+			throw new RangeError(`Cap must not be NaN`);
 		}
 		if (cap < initialDelay) {
 			throw new RangeError(

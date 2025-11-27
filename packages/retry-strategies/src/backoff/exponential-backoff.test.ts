@@ -231,24 +231,14 @@ suite("Exponential backoff strategy (Unit)", () => {
 	});
 
 	describe("parameter validation", () => {
-		test("rejects non-integer base values", (ctx: TestContext) => {
-			ctx.plan(3);
+		test("rejects NaN base values", (ctx: TestContext) => {
+			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(
-				() => new ExponentialBackoff(0.5, 1000),
-				RangeError,
-				"should reject fractional base",
-			);
 			ctx.assert.throws(
 				() => new ExponentialBackoff(Number.NaN, 1000),
 				RangeError,
 				"should reject NaN base",
-			);
-			ctx.assert.throws(
-				() => new ExponentialBackoff(Number.POSITIVE_INFINITY, 1000),
-				RangeError,
-				"should reject infinite base",
 			);
 		});
 
@@ -263,24 +253,14 @@ suite("Exponential backoff strategy (Unit)", () => {
 			);
 		});
 
-		test("rejects non-integer cap values", (ctx: TestContext) => {
-			ctx.plan(3);
+		test("rejects NaN cap values", (ctx: TestContext) => {
+			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(
-				() => new ExponentialBackoff(100, 0.5),
-				RangeError,
-				"should reject fractional cap",
-			);
 			ctx.assert.throws(
 				() => new ExponentialBackoff(100, Number.NaN),
 				RangeError,
 				"should reject NaN cap",
-			);
-			ctx.assert.throws(
-				() => new ExponentialBackoff(100, Number.POSITIVE_INFINITY),
-				RangeError,
-				"should reject infinite cap",
 			);
 		});
 
@@ -292,6 +272,28 @@ suite("Exponential backoff strategy (Unit)", () => {
 				() => new ExponentialBackoff(1000, 500),
 				RangeError,
 				"should reject cap less than base",
+			);
+		});
+
+		test("accepts fractional and special numeric values", (ctx: TestContext) => {
+			ctx.plan(4);
+
+			// Act & Assert
+			ctx.assert.doesNotThrow(
+				() => new ExponentialBackoff(100.5, 1000),
+				"should accept fractional base",
+			);
+			ctx.assert.doesNotThrow(
+				() => new ExponentialBackoff(100, 1000.5),
+				"should accept fractional cap",
+			);
+			ctx.assert.doesNotThrow(
+				() => new ExponentialBackoff(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY),
+				"should accept Infinity base",
+			);
+			ctx.assert.doesNotThrow(
+				() => new ExponentialBackoff(100, Number.POSITIVE_INFINITY),
+				"should accept Infinity cap",
 			);
 		});
 

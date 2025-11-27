@@ -9,12 +9,12 @@ export class ConstantBackoff implements BackoffStrategy {
 	/**
 	 * Creates a new ConstantBackoff instance.
 	 *
-	 * @param delay - The constant delay in milliseconds to return for each backoff (must be a safe integer)
-	 * @throws {RangeError} If delay is not a safe integer or is less than `0`
+	 * @param delay - The constant delay in milliseconds to return for each backoff (must be >= 0)
+	 * @throws {RangeError} If delay is NaN or less than 0
 	 */
 	public constructor(delay: number) {
-		if (!Number.isSafeInteger(delay)) {
-			throw new RangeError(`Delay must be a safe integer, received: ${delay}`);
+		if (Number.isNaN(delay)) {
+			throw new RangeError(`Delay must not be NaN`);
 		}
 		if (delay < 0) {
 			throw new RangeError(`Delay must be 0 or greater, received: ${delay}`);

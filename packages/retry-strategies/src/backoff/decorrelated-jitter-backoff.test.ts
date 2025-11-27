@@ -376,24 +376,14 @@ suite("Decorrelated jitter backoff strategy (Unit)", () => {
 	});
 
 	describe("validating constructor parameters", () => {
-		test("rejects non-integer base values", (ctx: TestContext) => {
-			ctx.plan(3);
+		test("rejects NaN base values", (ctx: TestContext) => {
+			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(
-				() => new DecorrelatedJitterBackoff(0.5, 1000),
-				RangeError,
-				"should reject fractional base",
-			);
 			ctx.assert.throws(
 				() => new DecorrelatedJitterBackoff(Number.NaN, 1000),
 				RangeError,
 				"should reject NaN base",
-			);
-			ctx.assert.throws(
-				() => new DecorrelatedJitterBackoff(Number.POSITIVE_INFINITY, 1000),
-				RangeError,
-				"should reject infinite base",
 			);
 		});
 
@@ -408,24 +398,14 @@ suite("Decorrelated jitter backoff strategy (Unit)", () => {
 			);
 		});
 
-		test("rejects non-integer cap values", (ctx: TestContext) => {
-			ctx.plan(3);
+		test("rejects NaN cap values", (ctx: TestContext) => {
+			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(
-				() => new DecorrelatedJitterBackoff(100, 0.5),
-				RangeError,
-				"should reject fractional cap",
-			);
 			ctx.assert.throws(
 				() => new DecorrelatedJitterBackoff(100, Number.NaN),
 				RangeError,
 				"should reject NaN cap",
-			);
-			ctx.assert.throws(
-				() => new DecorrelatedJitterBackoff(100, Number.POSITIVE_INFINITY),
-				RangeError,
-				"should reject infinite cap",
 			);
 		});
 
@@ -437,6 +417,28 @@ suite("Decorrelated jitter backoff strategy (Unit)", () => {
 				() => new DecorrelatedJitterBackoff(1000, 500),
 				RangeError,
 				"should reject cap less than base",
+			);
+		});
+
+		test("accepts fractional and special numeric values", (ctx: TestContext) => {
+			ctx.plan(4);
+
+			// Act & Assert
+			ctx.assert.doesNotThrow(
+				() => new DecorrelatedJitterBackoff(100.5, 1000),
+				"should accept fractional base",
+			);
+			ctx.assert.doesNotThrow(
+				() => new DecorrelatedJitterBackoff(100, 1000.5),
+				"should accept fractional cap",
+			);
+			ctx.assert.doesNotThrow(
+				() => new DecorrelatedJitterBackoff(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY),
+				"should accept Infinity base",
+			);
+			ctx.assert.doesNotThrow(
+				() => new DecorrelatedJitterBackoff(100, Number.POSITIVE_INFINITY),
+				"should accept Infinity cap",
 			);
 		});
 

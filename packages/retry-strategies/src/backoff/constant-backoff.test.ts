@@ -126,24 +126,14 @@ suite("Constant backoff strategy (Unit)", () => {
 	});
 
 	describe("parameter validation", () => {
-		test("rejects non-integer delay values", (ctx: TestContext) => {
-			ctx.plan(3);
+		test("rejects NaN delay values", (ctx: TestContext) => {
+			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(
-				() => new ConstantBackoff(0.5),
-				RangeError,
-				"should reject fractional delay",
-			);
 			ctx.assert.throws(
 				() => new ConstantBackoff(Number.NaN),
 				RangeError,
 				"should reject NaN delay",
-			);
-			ctx.assert.throws(
-				() => new ConstantBackoff(Number.POSITIVE_INFINITY),
-				RangeError,
-				"should reject infinite delay",
 			);
 		});
 
@@ -155,6 +145,20 @@ suite("Constant backoff strategy (Unit)", () => {
 				() => new ConstantBackoff(-100),
 				RangeError,
 				"should reject negative delay",
+			);
+		});
+
+		test("accepts fractional and special numeric values", (ctx: TestContext) => {
+			ctx.plan(2);
+
+			// Act & Assert
+			ctx.assert.doesNotThrow(
+				() => new ConstantBackoff(100.5),
+				"should accept fractional values",
+			);
+			ctx.assert.doesNotThrow(
+				() => new ConstantBackoff(Number.POSITIVE_INFINITY),
+				"should accept Infinity",
 			);
 		});
 

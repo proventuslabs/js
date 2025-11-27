@@ -334,24 +334,14 @@ suite("Linear backoff strategy (Unit)", () => {
 	});
 
 	describe("parameter validation", () => {
-		test("rejects non-integer increment values", (ctx: TestContext) => {
-			ctx.plan(3);
+		test("rejects NaN increment values", (ctx: TestContext) => {
+			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(
-				() => new LinearBackoff(0.5),
-				RangeError,
-				"should reject fractional increment",
-			);
 			ctx.assert.throws(
 				() => new LinearBackoff(Number.NaN),
 				RangeError,
 				"should reject NaN increment",
-			);
-			ctx.assert.throws(
-				() => new LinearBackoff(Number.POSITIVE_INFINITY),
-				RangeError,
-				"should reject infinite increment",
 			);
 		});
 
@@ -366,24 +356,14 @@ suite("Linear backoff strategy (Unit)", () => {
 			);
 		});
 
-		test("rejects non-integer initial delay values", (ctx: TestContext) => {
-			ctx.plan(3);
+		test("rejects NaN initial delay values", (ctx: TestContext) => {
+			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(
-				() => new LinearBackoff(100, 0.5),
-				RangeError,
-				"should reject fractional initial delay",
-			);
 			ctx.assert.throws(
 				() => new LinearBackoff(100, Number.NaN),
 				RangeError,
 				"should reject NaN initial delay",
-			);
-			ctx.assert.throws(
-				() => new LinearBackoff(100, Number.POSITIVE_INFINITY),
-				RangeError,
-				"should reject infinite initial delay",
 			);
 		});
 
@@ -398,24 +378,14 @@ suite("Linear backoff strategy (Unit)", () => {
 			);
 		});
 
-		test("rejects non-integer cap values", (ctx: TestContext) => {
-			ctx.plan(3);
+		test("rejects NaN cap values", (ctx: TestContext) => {
+			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(
-				() => new LinearBackoff(100, 0, 0.5),
-				RangeError,
-				"should reject fractional cap",
-			);
 			ctx.assert.throws(
 				() => new LinearBackoff(100, 0, Number.NaN),
 				RangeError,
 				"should reject NaN cap",
-			);
-			ctx.assert.throws(
-				() => new LinearBackoff(100, 0, Number.POSITIVE_INFINITY),
-				RangeError,
-				"should reject infinite cap",
 			);
 		});
 
@@ -432,6 +402,36 @@ suite("Linear backoff strategy (Unit)", () => {
 				() => new LinearBackoff(100, 1000, 0),
 				RangeError,
 				"should reject cap of 0 when initial delay is positive",
+			);
+		});
+
+		test("accepts fractional and special numeric values", (ctx: TestContext) => {
+			ctx.plan(6);
+
+			// Act & Assert
+			ctx.assert.doesNotThrow(
+				() => new LinearBackoff(100.5),
+				"should accept fractional increment",
+			);
+			ctx.assert.doesNotThrow(
+				() => new LinearBackoff(100, 200.5),
+				"should accept fractional initial delay",
+			);
+			ctx.assert.doesNotThrow(
+				() => new LinearBackoff(100, 0, 1000.5),
+				"should accept fractional cap",
+			);
+			ctx.assert.doesNotThrow(
+				() => new LinearBackoff(Number.POSITIVE_INFINITY),
+				"should accept Infinity increment",
+			);
+			ctx.assert.doesNotThrow(
+				() => new LinearBackoff(100, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY),
+				"should accept Infinity initial delay",
+			);
+			ctx.assert.doesNotThrow(
+				() => new LinearBackoff(100, 0, Number.POSITIVE_INFINITY),
+				"should accept Infinity cap",
 			);
 		});
 

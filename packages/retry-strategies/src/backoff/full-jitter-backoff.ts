@@ -19,10 +19,10 @@ export class FullJitterBackoff implements BackoffStrategy {
 	 * Creates a new FullJitterBackoff instance.
 	 *
 	 * @param base - The base delay in milliseconds (must be a safe integer >= 0)
-	 * @param cap - The maximum delay in milliseconds (must be a safe integer >= base)
+	 * @param cap - The maximum delay in milliseconds (must be a safe integer >= base, defaults to MAX_SAFE_INTEGER)
 	 * @throws {RangeError} If base or cap is not a safe integer or is invalid
 	 */
-	public constructor(base: number, cap: number) {
+	public constructor(base: number, cap: number = Number.MAX_SAFE_INTEGER) {
 		if (!Number.isSafeInteger(base)) {
 			throw new RangeError(`Base must be a safe integer, received: ${base}`);
 		}

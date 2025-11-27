@@ -162,6 +162,41 @@ suite("Fibonacci backoff strategy (Unit)", () => {
 				"should remain at cap",
 			); // min(500, 2500) = 500
 		});
+
+		test("uses default cap when not provided", (ctx: TestContext) => {
+			ctx.plan(5);
+
+			// Arrange
+			const backoff = new FibonacciBackoff(100);
+
+			// Act & Assert
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				100,
+				"should return 100ms on first call",
+			); // 100
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				100,
+				"should return 100ms on second call",
+			); // 100
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				200,
+				"should return 200ms on third call",
+			); // 200
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				300,
+				"should return 300ms on fourth call",
+			); // 300
+			// Continue to verify it keeps growing (not capped at low value)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				500,
+				"should continue growing without artificial cap",
+			); // 500
+		});
 	});
 
 	describe("strategy reset", () => {
@@ -326,7 +361,7 @@ suite("Fibonacci backoff strategy (Unit)", () => {
 		});
 
 		test("accepts valid parameter combinations", (ctx: TestContext) => {
-			ctx.plan(4);
+			ctx.plan(5);
 
 			// Act & Assert
 			ctx.assert.doesNotThrow(
@@ -344,6 +379,10 @@ suite("Fibonacci backoff strategy (Unit)", () => {
 			ctx.assert.doesNotThrow(
 				() => new FibonacciBackoff(100, 10000),
 				"should accept valid parameters",
+			);
+			ctx.assert.doesNotThrow(
+				() => new FibonacciBackoff(100),
+				"should accept base without cap",
 			);
 		});
 	});

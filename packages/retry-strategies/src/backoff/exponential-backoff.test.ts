@@ -122,6 +122,36 @@ suite("Exponential backoff strategy (Unit)", () => {
 				"should remain at cap",
 			); // min(500, 2000) = 500
 		});
+
+		test("uses default cap when not provided", (ctx: TestContext) => {
+			ctx.plan(4);
+
+			// Arrange
+			const backoff = new ExponentialBackoff(100);
+
+			// Act & Assert
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				100,
+				"should return 100ms on first call",
+			); // 100 * 2^0 = 100
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				200,
+				"should return 200ms on second call",
+			); // 100 * 2^1 = 200
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				400,
+				"should return 400ms on third call",
+			); // 100 * 2^2 = 400
+			// Continue to verify it keeps growing (not capped at low value)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				800,
+				"should continue growing without artificial cap",
+			); // 100 * 2^3 = 800
+		});
 	});
 
 	describe("strategy reset", () => {
@@ -266,7 +296,7 @@ suite("Exponential backoff strategy (Unit)", () => {
 		});
 
 		test("accepts valid parameter combinations", (ctx: TestContext) => {
-			ctx.plan(4);
+			ctx.plan(5);
 
 			// Act & Assert
 			ctx.assert.doesNotThrow(
@@ -284,6 +314,10 @@ suite("Exponential backoff strategy (Unit)", () => {
 			ctx.assert.doesNotThrow(
 				() => new ExponentialBackoff(100, 10000),
 				"should accept valid parameters",
+			);
+			ctx.assert.doesNotThrow(
+				() => new ExponentialBackoff(100),
+				"should accept base without cap",
 			);
 		});
 	});

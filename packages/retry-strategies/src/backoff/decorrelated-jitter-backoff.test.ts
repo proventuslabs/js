@@ -5,6 +5,39 @@ import { DecorrelatedJitterBackoff } from "./decorrelated-jitter-backoff.ts";
 /* node:coverage disable */
 suite("Decorrelated jitter backoff strategy (Unit)", () => {
 	describe("calculating backoff delays", () => {
+		test("uses default cap when not provided", (ctx: TestContext) => {
+			ctx.plan(4);
+
+			// Arrange
+			let callCount = 0;
+			const randomValues = [0.5, 0.5, 0.5, 0.5];
+			ctx.mock.method(Math, "random", () => randomValues[callCount++]);
+			const backoff = new DecorrelatedJitterBackoff(100);
+
+			// Act & Assert
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				200,
+				"should return 200ms on first call",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				350,
+				"should return 350ms on second call",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				575,
+				"should return 575ms on third call",
+			);
+			// Continue to verify it keeps growing (not capped at low value)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				912,
+				"should continue growing without artificial cap",
+			);
+		});
+
 		test("returns delays based on previous delay", (ctx: TestContext) => {
 			ctx.plan(5);
 
@@ -408,7 +441,7 @@ suite("Decorrelated jitter backoff strategy (Unit)", () => {
 		});
 
 		test("accepts valid parameter combinations", (ctx: TestContext) => {
-			ctx.plan(4);
+			ctx.plan(5);
 
 			// Act & Assert
 			ctx.assert.doesNotThrow(
@@ -426,6 +459,10 @@ suite("Decorrelated jitter backoff strategy (Unit)", () => {
 			ctx.assert.doesNotThrow(
 				() => new DecorrelatedJitterBackoff(100, 10000),
 				"should accept valid parameters",
+			);
+			ctx.assert.doesNotThrow(
+				() => new DecorrelatedJitterBackoff(100),
+				"should accept base without cap",
 			);
 		});
 	});

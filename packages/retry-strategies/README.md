@@ -136,7 +136,7 @@ Increases the delay exponentially using the AWS algorithm.
 ```typescript
 const strategy = new ExponentialBackoff(
   100,   // base delay in ms
-  5000   // cap (maximum delay) in ms
+  5000   // cap (maximum delay) in ms (optional, defaults to Infinity)
 );
 // Delays: 100ms, 200ms, 400ms, 800ms, 1600ms, 3200ms, 5000ms, 5000ms...
 ```
@@ -145,12 +145,13 @@ const strategy = new ExponentialBackoff(
 
 Increases the delay linearly by a fixed increment on each retry.
 
-**Formula:** `initialDelay + (increment * n)`
+**Formula:** `min(cap, initialDelay + (increment * n))`
 
 ```typescript
 const strategy = new LinearBackoff(
-  1000,  // increment in ms
-  500    // initial delay in ms (optional, default: 0)
+  1000,   // increment in ms
+  500,    // initial delay in ms (optional, default: 0)
+  10000   // cap (maximum delay) in ms (optional, defaults to Infinity)
 );
 // Delays: 500ms, 1500ms, 2500ms, 3500ms, 4500ms...
 ```
@@ -164,7 +165,7 @@ Increases the delay following the Fibonacci sequence.
 ```typescript
 const strategy = new FibonacciBackoff(
   100,   // base delay in ms
-  10000  // cap (maximum delay) in ms
+  10000  // cap (maximum delay) in ms (optional, defaults to Infinity)
 );
 // Delays: 100ms, 100ms, 200ms, 300ms, 500ms, 800ms, 1300ms, 2100ms...
 ```
@@ -178,7 +179,7 @@ Uses the AWS FullJitter algorithm to add randomness to exponential backoff, prev
 ```typescript
 const strategy = new FullJitterBackoff(
   100,   // base delay in ms
-  5000   // cap (maximum delay) in ms
+  5000   // cap (maximum delay) in ms (optional, defaults to Infinity)
 );
 // Delays: random values between 0 and the exponential cap
 ```
@@ -192,7 +193,7 @@ Uses the AWS EqualJitter algorithm, providing a balanced approach between expone
 ```typescript
 const strategy = new EqualJitterBackoff(
   100,   // base delay in ms
-  5000   // cap (maximum delay) in ms
+  5000   // cap (maximum delay) in ms (optional, defaults to Infinity)
 );
 ```
 
@@ -200,12 +201,12 @@ const strategy = new EqualJitterBackoff(
 
 Uses the AWS Decorrelated Jitter algorithm, where each delay is based on the previous delay rather than attempt count.
 
-**Formula:** `random(base, previousDelay * 3)`
+**Formula:** `min(cap, random(base, previousDelay * 3))`
 
 ```typescript
 const strategy = new DecorrelatedJitterBackoff(
   100,   // base delay in ms
-  10000  // cap (maximum delay) in ms
+  10000  // cap (maximum delay) in ms (optional, defaults to Infinity)
 );
 ```
 

@@ -15,20 +15,25 @@ export class FibonacciBackoff implements BackoffStrategy {
 	/**
 	 * Creates a new FibonacciBackoff instance.
 	 *
-	 * @param base - The base delay in milliseconds (must be a safe integer >= 0)
-	 * @param cap - The maximum delay in milliseconds (must be a safe integer >= base)
-	 * @throws {RangeError} If base or cap is not a safe integer or is invalid
+	 * @param base - The base delay in milliseconds (must be >= 0)
+	 * @param cap - The maximum delay in milliseconds (must be >= base, defaults to Infinity)
+	 * @throws {RangeError} If base or cap is NaN or invalid
+	 *
+	 * @remarks
+	 * After an extremely large number of retry attempts (~90+ iterations),
+	 * floating-point precision may be lost in Fibonacci calculations. In practice, this is not
+	 * a concern as the cap will have been reached long before precision loss occurs.
 	 */
-	public constructor(base: number, cap: number) {
-		if (!Number.isSafeInteger(base)) {
-			throw new RangeError(`Base must be a safe integer, received: ${base}`);
+	public constructor(base: number, cap: number = Number.POSITIVE_INFINITY) {
+		if (Number.isNaN(base)) {
+			throw new RangeError(`Base must not be NaN`);
 		}
 		if (base < 0) {
 			throw new RangeError(`Base must be 0 or greater, received: ${base}`);
 		}
 
-		if (!Number.isSafeInteger(cap)) {
-			throw new RangeError(`Cap must be a safe integer, received: ${cap}`);
+		if (Number.isNaN(cap)) {
+			throw new RangeError(`Cap must not be NaN`);
 		}
 		if (cap < base) {
 			throw new RangeError(

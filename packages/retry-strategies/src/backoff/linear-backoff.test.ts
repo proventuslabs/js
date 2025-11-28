@@ -98,6 +98,107 @@ suite("Linear backoff strategy (Unit)", () => {
 		});
 	});
 
+	describe("cap enforcement", () => {
+		test("limits delay to cap value", (ctx: TestContext) => {
+			ctx.plan(5);
+
+			// Arrange
+			const backoff = new LinearBackoff(100, 0, 250);
+
+			// Act & Assert
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should start at initial delay",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				100,
+				"should increase linearly",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				200,
+				"should continue increasing",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				250,
+				"should cap at maximum",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				250,
+				"should remain at cap",
+			);
+		});
+
+		test("respects cap from the first call", (ctx: TestContext) => {
+			ctx.plan(3);
+
+			// Arrange
+			const backoff = new LinearBackoff(100, 500, 500);
+
+			// Act & Assert
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				500,
+				"should start at initial delay which equals cap",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				500,
+				"should remain at cap",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				500,
+				"should remain at cap",
+			);
+		});
+
+		test("works with cap larger than needed", (ctx: TestContext) => {
+			ctx.plan(3);
+
+			// Arrange
+			const backoff = new LinearBackoff(50, 100, 10000);
+
+			// Act & Assert
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				100,
+				"should return uncapped delay",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				150,
+				"should return uncapped delay",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				200,
+				"should return uncapped delay",
+			);
+		});
+
+		test("caps at exact boundary", (ctx: TestContext) => {
+			ctx.plan(4);
+
+			// Arrange
+			const backoff = new LinearBackoff(100, 200, 400);
+
+			// Act & Assert
+			ctx.assert.strictEqual(backoff.nextBackoff(), 200);
+			ctx.assert.strictEqual(backoff.nextBackoff(), 300);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				400,
+				"should reach cap exactly",
+			);
+			ctx.assert.strictEqual(backoff.nextBackoff(), 400, "should stay at cap");
+		});
+	});
+
 	describe("strategy reset", () => {
 		test("restarts progression from initial delay", (ctx: TestContext) => {
 			ctx.plan(6);
@@ -140,6 +241,56 @@ suite("Linear backoff strategy (Unit)", () => {
 				"should continue increasing after reset",
 			);
 		});
+
+		test("resets cap behavior correctly", (ctx: TestContext) => {
+			ctx.plan(8);
+
+			// Arrange
+			const backoff = new LinearBackoff(100, 0, 200);
+
+			// Act & Assert - First cycle
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should start at initial delay",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				100,
+				"should increase linearly",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				200,
+				"should cap at maximum",
+			);
+			ctx.assert.strictEqual(backoff.nextBackoff(), 200, "should stay at cap");
+
+			// Reset
+			backoff.resetBackoff();
+
+			// Act & Assert - Second cycle
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should restart from initial delay after reset",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				100,
+				"should increase linearly after reset",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				200,
+				"should cap at maximum after reset",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				200,
+				"should stay at cap after reset",
+			);
+		});
 	});
 
 	describe("multiple instances", () => {
@@ -175,24 +326,14 @@ suite("Linear backoff strategy (Unit)", () => {
 	});
 
 	describe("parameter validation", () => {
-		test("rejects non-integer increment values", (ctx: TestContext) => {
-			ctx.plan(3);
+		test("rejects NaN increment values", (ctx: TestContext) => {
+			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(
-				() => new LinearBackoff(0.5),
-				RangeError,
-				"should reject fractional increment",
-			);
 			ctx.assert.throws(
 				() => new LinearBackoff(Number.NaN),
 				RangeError,
 				"should reject NaN increment",
-			);
-			ctx.assert.throws(
-				() => new LinearBackoff(Number.POSITIVE_INFINITY),
-				RangeError,
-				"should reject infinite increment",
 			);
 		});
 
@@ -207,24 +348,14 @@ suite("Linear backoff strategy (Unit)", () => {
 			);
 		});
 
-		test("rejects non-integer initial delay values", (ctx: TestContext) => {
-			ctx.plan(3);
+		test("rejects NaN initial delay values", (ctx: TestContext) => {
+			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(
-				() => new LinearBackoff(100, 0.5),
-				RangeError,
-				"should reject fractional initial delay",
-			);
 			ctx.assert.throws(
 				() => new LinearBackoff(100, Number.NaN),
 				RangeError,
 				"should reject NaN initial delay",
-			);
-			ctx.assert.throws(
-				() => new LinearBackoff(100, Number.POSITIVE_INFINITY),
-				RangeError,
-				"should reject infinite initial delay",
 			);
 		});
 
@@ -239,8 +370,70 @@ suite("Linear backoff strategy (Unit)", () => {
 			);
 		});
 
+		test("rejects NaN cap values", (ctx: TestContext) => {
+			ctx.plan(1);
+
+			// Act & Assert
+			ctx.assert.throws(
+				() => new LinearBackoff(100, 0, Number.NaN),
+				RangeError,
+				"should reject NaN cap",
+			);
+		});
+
+		test("rejects cap less than initial delay", (ctx: TestContext) => {
+			ctx.plan(2);
+
+			// Act & Assert
+			ctx.assert.throws(
+				() => new LinearBackoff(100, 500, 400),
+				RangeError,
+				"should reject cap less than initial delay",
+			);
+			ctx.assert.throws(
+				() => new LinearBackoff(100, 1000, 0),
+				RangeError,
+				"should reject cap of 0 when initial delay is positive",
+			);
+		});
+
+		test("accepts fractional and special numeric values", (ctx: TestContext) => {
+			ctx.plan(6);
+
+			// Act & Assert
+			ctx.assert.doesNotThrow(
+				() => new LinearBackoff(100.5),
+				"should accept fractional increment",
+			);
+			ctx.assert.doesNotThrow(
+				() => new LinearBackoff(100, 200.5),
+				"should accept fractional initial delay",
+			);
+			ctx.assert.doesNotThrow(
+				() => new LinearBackoff(100, 0, 1000.5),
+				"should accept fractional cap",
+			);
+			ctx.assert.doesNotThrow(
+				() => new LinearBackoff(Number.POSITIVE_INFINITY),
+				"should accept Infinity increment",
+			);
+			ctx.assert.doesNotThrow(
+				() =>
+					new LinearBackoff(
+						100,
+						Number.POSITIVE_INFINITY,
+						Number.POSITIVE_INFINITY,
+					),
+				"should accept Infinity initial delay",
+			);
+			ctx.assert.doesNotThrow(
+				() => new LinearBackoff(100, 0, Number.POSITIVE_INFINITY),
+				"should accept Infinity cap",
+			);
+		});
+
 		test("accepts valid parameter combinations", (ctx: TestContext) => {
-			ctx.plan(4);
+			ctx.plan(6);
 
 			// Act & Assert
 			ctx.assert.doesNotThrow(
@@ -258,6 +451,14 @@ suite("Linear backoff strategy (Unit)", () => {
 			ctx.assert.doesNotThrow(
 				() => new LinearBackoff(100, 200),
 				"should accept valid parameters",
+			);
+			ctx.assert.doesNotThrow(
+				() => new LinearBackoff(100, 0, 1000),
+				"should accept valid cap",
+			);
+			ctx.assert.doesNotThrow(
+				() => new LinearBackoff(100, 500, 500),
+				"should accept cap equal to initial delay",
 			);
 		});
 	});

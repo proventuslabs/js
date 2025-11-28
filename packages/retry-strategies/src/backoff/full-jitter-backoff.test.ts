@@ -5,6 +5,39 @@ import { FullJitterBackoff } from "./full-jitter-backoff.ts";
 /* node:coverage disable */
 suite("Full jitter backoff strategy (Unit)", () => {
 	describe("calculating backoff delays", () => {
+		test("uses default cap when not provided", (ctx: TestContext) => {
+			ctx.plan(4);
+
+			// Arrange
+			let callCount = 0;
+			const randomValues = [0.5, 0.5, 0.5, 0.5];
+			ctx.mock.method(Math, "random", () => randomValues[callCount++]);
+			const backoff = new FullJitterBackoff(100);
+
+			// Act & Assert
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				50,
+				"should return 50ms on first call",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				100,
+				"should return 100ms on second call",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				200,
+				"should return 200ms on third call",
+			);
+			// Continue to verify it keeps growing (not capped at low value)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				400,
+				"should continue growing without artificial cap",
+			);
+		});
+
 		test("returns random delays within exponential bounds", (ctx: TestContext) => {
 			ctx.plan(5);
 
@@ -271,24 +304,14 @@ suite("Full jitter backoff strategy (Unit)", () => {
 	});
 
 	describe("validating constructor parameters", () => {
-		test("rejects non-integer base values", (ctx: TestContext) => {
-			ctx.plan(3);
+		test("rejects NaN base values", (ctx: TestContext) => {
+			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(
-				() => new FullJitterBackoff(0.5, 1000),
-				RangeError,
-				"should reject fractional base",
-			);
 			ctx.assert.throws(
 				() => new FullJitterBackoff(Number.NaN, 1000),
 				RangeError,
 				"should reject NaN base",
-			);
-			ctx.assert.throws(
-				() => new FullJitterBackoff(Number.POSITIVE_INFINITY, 1000),
-				RangeError,
-				"should reject infinite base",
 			);
 		});
 
@@ -303,24 +326,14 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			);
 		});
 
-		test("rejects non-integer cap values", (ctx: TestContext) => {
-			ctx.plan(3);
+		test("rejects NaN cap values", (ctx: TestContext) => {
+			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(
-				() => new FullJitterBackoff(100, 0.5),
-				RangeError,
-				"should reject fractional cap",
-			);
 			ctx.assert.throws(
 				() => new FullJitterBackoff(100, Number.NaN),
 				RangeError,
 				"should reject NaN cap",
-			);
-			ctx.assert.throws(
-				() => new FullJitterBackoff(100, Number.POSITIVE_INFINITY),
-				RangeError,
-				"should reject infinite cap",
 			);
 		});
 
@@ -335,8 +348,34 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			);
 		});
 
-		test("accepts valid parameter combinations", (ctx: TestContext) => {
+		test("accepts fractional and special numeric values", (ctx: TestContext) => {
 			ctx.plan(4);
+
+			// Act & Assert
+			ctx.assert.doesNotThrow(
+				() => new FullJitterBackoff(100.5, 1000),
+				"should accept fractional base",
+			);
+			ctx.assert.doesNotThrow(
+				() => new FullJitterBackoff(100, 1000.5),
+				"should accept fractional cap",
+			);
+			ctx.assert.doesNotThrow(
+				() =>
+					new FullJitterBackoff(
+						Number.POSITIVE_INFINITY,
+						Number.POSITIVE_INFINITY,
+					),
+				"should accept Infinity base",
+			);
+			ctx.assert.doesNotThrow(
+				() => new FullJitterBackoff(100, Number.POSITIVE_INFINITY),
+				"should accept Infinity cap",
+			);
+		});
+
+		test("accepts valid parameter combinations", (ctx: TestContext) => {
+			ctx.plan(5);
 
 			// Act & Assert
 			ctx.assert.doesNotThrow(
@@ -354,6 +393,10 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			ctx.assert.doesNotThrow(
 				() => new FullJitterBackoff(100, 10000),
 				"should accept valid parameters",
+			);
+			ctx.assert.doesNotThrow(
+				() => new FullJitterBackoff(100),
+				"should accept base without cap",
 			);
 		});
 	});

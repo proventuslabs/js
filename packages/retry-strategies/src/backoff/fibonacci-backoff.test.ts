@@ -162,6 +162,41 @@ suite("Fibonacci backoff strategy (Unit)", () => {
 				"should remain at cap",
 			); // min(500, 2500) = 500
 		});
+
+		test("uses default cap when not provided", (ctx: TestContext) => {
+			ctx.plan(5);
+
+			// Arrange
+			const backoff = new FibonacciBackoff(100);
+
+			// Act & Assert
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				100,
+				"should return 100ms on first call",
+			); // 100
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				100,
+				"should return 100ms on second call",
+			); // 100
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				200,
+				"should return 200ms on third call",
+			); // 200
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				300,
+				"should return 300ms on fourth call",
+			); // 300
+			// Continue to verify it keeps growing (not capped at low value)
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				500,
+				"should continue growing without artificial cap",
+			); // 500
+		});
 	});
 
 	describe("strategy reset", () => {
@@ -261,24 +296,14 @@ suite("Fibonacci backoff strategy (Unit)", () => {
 	});
 
 	describe("parameter validation", () => {
-		test("rejects non-integer base values", (ctx: TestContext) => {
-			ctx.plan(3);
+		test("rejects NaN base values", (ctx: TestContext) => {
+			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(
-				() => new FibonacciBackoff(0.5, 1000),
-				RangeError,
-				"should reject fractional base",
-			);
 			ctx.assert.throws(
 				() => new FibonacciBackoff(Number.NaN, 1000),
 				RangeError,
 				"should reject NaN base",
-			);
-			ctx.assert.throws(
-				() => new FibonacciBackoff(Number.POSITIVE_INFINITY, 1000),
-				RangeError,
-				"should reject infinite base",
 			);
 		});
 
@@ -293,24 +318,14 @@ suite("Fibonacci backoff strategy (Unit)", () => {
 			);
 		});
 
-		test("rejects non-integer cap values", (ctx: TestContext) => {
-			ctx.plan(3);
+		test("rejects NaN cap values", (ctx: TestContext) => {
+			ctx.plan(1);
 
 			// Act & Assert
-			ctx.assert.throws(
-				() => new FibonacciBackoff(100, 0.5),
-				RangeError,
-				"should reject fractional cap",
-			);
 			ctx.assert.throws(
 				() => new FibonacciBackoff(100, Number.NaN),
 				RangeError,
 				"should reject NaN cap",
-			);
-			ctx.assert.throws(
-				() => new FibonacciBackoff(100, Number.POSITIVE_INFINITY),
-				RangeError,
-				"should reject infinite cap",
 			);
 		});
 
@@ -325,8 +340,34 @@ suite("Fibonacci backoff strategy (Unit)", () => {
 			);
 		});
 
-		test("accepts valid parameter combinations", (ctx: TestContext) => {
+		test("accepts fractional and special numeric values", (ctx: TestContext) => {
 			ctx.plan(4);
+
+			// Act & Assert
+			ctx.assert.doesNotThrow(
+				() => new FibonacciBackoff(100.5, 1000),
+				"should accept fractional base",
+			);
+			ctx.assert.doesNotThrow(
+				() => new FibonacciBackoff(100, 1000.5),
+				"should accept fractional cap",
+			);
+			ctx.assert.doesNotThrow(
+				() =>
+					new FibonacciBackoff(
+						Number.POSITIVE_INFINITY,
+						Number.POSITIVE_INFINITY,
+					),
+				"should accept Infinity base",
+			);
+			ctx.assert.doesNotThrow(
+				() => new FibonacciBackoff(100, Number.POSITIVE_INFINITY),
+				"should accept Infinity cap",
+			);
+		});
+
+		test("accepts valid parameter combinations", (ctx: TestContext) => {
+			ctx.plan(5);
 
 			// Act & Assert
 			ctx.assert.doesNotThrow(
@@ -344,6 +385,10 @@ suite("Fibonacci backoff strategy (Unit)", () => {
 			ctx.assert.doesNotThrow(
 				() => new FibonacciBackoff(100, 10000),
 				"should accept valid parameters",
+			);
+			ctx.assert.doesNotThrow(
+				() => new FibonacciBackoff(100),
+				"should accept base without cap",
 			);
 		});
 	});

@@ -3,25 +3,29 @@ import type { BackoffStrategy } from "./interface.ts";
 /**
  * A backoff policy that increases the delay linearly by a fixed increment on each retry.
  *
- * The delay for attempt n is: initialDelay + (increment * n)
+ * The delay for attempt n is: min(cap, initialDelay + (increment * n))
  */
 export class LinearBackoff implements BackoffStrategy {
 	private readonly initialDelay: number;
 	private readonly increment: number;
+	private readonly cap: number;
 	private attemptCount: number;
 
 	/**
 	 * Creates a new LinearBackoff instance.
 	 *
-	 * @param increment - The amount to increase the delay by on each retry (must be a safe integer >= 0)
-	 * @param initialDelay - The initial delay in milliseconds before any increments (must be a safe integer >= 0, defaults to 0)
-	 * @throws {RangeError} If increment or initialDelay is not a safe integer or is less than 0
+	 * @param increment - The amount to increase the delay by on each retry (must be >= 0)
+	 * @param initialDelay - The initial delay in milliseconds before any increments (must be >= 0, defaults to 0)
+	 * @param cap - The maximum delay in milliseconds (must be >= initialDelay, defaults to Infinity)
+	 * @throws {RangeError} If increment, initialDelay, or cap is NaN or invalid
 	 */
-	public constructor(increment: number, initialDelay = 0) {
-		if (!Number.isSafeInteger(increment)) {
-			throw new RangeError(
-				`Increment must be a safe integer, received: ${increment}`,
-			);
+	public constructor(
+		increment: number,
+		initialDelay = 0,
+		cap: number = Number.POSITIVE_INFINITY,
+	) {
+		if (Number.isNaN(increment)) {
+			throw new RangeError(`Increment must not be NaN`);
 		}
 		if (increment < 0) {
 			throw new RangeError(
@@ -29,10 +33,8 @@ export class LinearBackoff implements BackoffStrategy {
 			);
 		}
 
-		if (!Number.isSafeInteger(initialDelay)) {
-			throw new RangeError(
-				`Initial delay must be a safe integer, received: ${initialDelay}`,
-			);
+		if (Number.isNaN(initialDelay)) {
+			throw new RangeError(`Initial delay must not be NaN`);
 		}
 		if (initialDelay < 0) {
 			throw new RangeError(
@@ -40,19 +42,32 @@ export class LinearBackoff implements BackoffStrategy {
 			);
 		}
 
+		if (Number.isNaN(cap)) {
+			throw new RangeError(`Cap must not be NaN`);
+		}
+		if (cap < initialDelay) {
+			throw new RangeError(
+				`Cap must be greater than or equal to initial delay, received cap: ${cap}, initial delay: ${initialDelay}`,
+			);
+		}
+
 		this.initialDelay = initialDelay;
 		this.increment = increment;
+		this.cap = cap;
 		this.attemptCount = 0;
 	}
 
 	/**
 	 * Calculate the next backoff delay.
-	 * Returns a delay that increases linearly with each call.
+	 * Returns a delay that increases linearly with each call, capped at the maximum.
 	 *
-	 * @returns The next delay in milliseconds: initialDelay + (increment * attemptCount)
+	 * @returns The next delay in milliseconds: min(cap, initialDelay + (increment * attemptCount))
 	 */
 	public nextBackoff(): number {
-		const delay = this.initialDelay + this.increment * this.attemptCount;
+		const delay = Math.min(
+			this.cap,
+			this.initialDelay + this.increment * this.attemptCount,
+		);
 		this.attemptCount++;
 		return delay;
 	}

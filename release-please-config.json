@@ -12,7 +12,7 @@
 			"extra-files": [
 				{
 					"type": "json",
-					"path": "packages/retry-strategies/jsr.json",
+					"path": "jsr.json",
 					"jsonpath": "$.version"
 				}
 			]

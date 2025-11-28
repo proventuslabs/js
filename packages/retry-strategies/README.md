@@ -234,6 +234,52 @@ Always returns `NaN`, indicating that no retries should be made.
 const strategy = new StopBackoff(); // Never retries
 ```
 
+## Utility Functions
+
+### `upto(retries, strategy)`
+
+Limits a backoff strategy to a maximum number of retry attempts. Once the limit is reached, `nextBackoff()` returns `NaN` to stop retrying.
+
+#### Parameters
+
+- **`retries`** `number` - Maximum number of retry attempts allowed (must be >= 0 and an integer)
+- **`strategy`** `BackoffStrategy` - The underlying backoff strategy to wrap
+
+#### Returns
+
+`BackoffStrategy` - A new BackoffStrategy that stops after the specified number of retries
+
+#### Throws
+
+- **`RangeError`** - If retries is NaN, not an integer, or less than 0
+
+#### Example
+
+```typescript
+import { retry, ExponentialBackoff, upto } from "@proventuslabs/retry-strategies";
+
+// Limit exponential backoff to exactly 3 retry attempts
+const strategy = upto(3, new ExponentialBackoff(100, 5000));
+
+await retry(
+  () => fetchData(),
+  { strategy }
+);
+// Will attempt the operation at most 4 times (initial + 3 retries)
+```
+
+You can also combine `upto` with any other backoff strategy:
+
+```typescript
+import { upto, FullJitterBackoff } from "@proventuslabs/retry-strategies";
+
+// Limit jitter backoff to 5 attempts
+const limitedJitter = upto(5, new FullJitterBackoff(100, 5000));
+
+// Limit constant backoff to 10 attempts
+const limitedPolling = upto(10, new ConstantBackoff(1000));
+```
+
 ## Behavior
 
 ### Key Features
@@ -286,7 +332,7 @@ await Promise.all([
 ### Example 1: API Request with Exponential Backoff
 
 ```typescript
-import { retry, ExponentialBackoff } from "@proventuslabs/retry-strategies";
+import { retry, ExponentialBackoff, upto } from "@proventuslabs/retry-strategies";
 
 async function fetchUserData(userId: string) {
   return retry(
@@ -298,10 +344,11 @@ async function fetchUserData(userId: string) {
       return response.json();
     },
     {
-      strategy: new ExponentialBackoff(100, 5000),
-      stop: (error, attempt) => {
-        // Stop on client errors (4xx) or after 5 attempts
-        return error.message.includes("HTTP 4") || attempt >= 5;
+      // Limit to 5 retry attempts with exponential backoff
+      strategy: upto(5, new ExponentialBackoff(100, 5000)),
+      stop: (error) => {
+        // Stop on client errors (4xx)
+        return error.message.includes("HTTP 4");
       }
     }
   );
@@ -311,7 +358,7 @@ async function fetchUserData(userId: string) {
 ### Example 2: Polling with Linear Backoff
 
 ```typescript
-import { retry, LinearBackoff } from "@proventuslabs/retry-strategies";
+import { retry, LinearBackoff, upto } from "@proventuslabs/retry-strategies";
 
 async function pollForJobCompletion(jobId: string) {
   return retry(
@@ -323,8 +370,8 @@ async function pollForJobCompletion(jobId: string) {
       return job;
     },
     {
-      strategy: new LinearBackoff(1000, 500), // 500ms, 1500ms, 2500ms...
-      stop: (error, attempt) => attempt >= 20 // Max 20 attempts
+      // Limit to 20 attempts: 500ms, 1500ms, 2500ms...
+      strategy: upto(20, new LinearBackoff(1000, 500))
     }
   );
 }
@@ -402,7 +449,7 @@ async function fetchWithTransientErrorRetry() {
 
 - **Maximum delay**: Delays cannot exceed INT32_MAX (2147483647ms, approximately 24.8 days) due to `setTimeout` limitations
 - **Not concurrency-safe**: Stateful strategies should not be shared across concurrent `retry` operations
-- **No built-in attempt limit**: The `retry` function will continue indefinitely unless the strategy exhausts, the stop function returns `true`, or an abort signal is triggered. Always provide a stop condition or use strategies that eventually return `NaN`.
+- **No built-in attempt limit**: The `retry` function will continue indefinitely unless the strategy exhausts, the stop function returns `true`, or an abort signal is triggered. Use the `upto()` utility to limit attempts, provide a stop condition, or use strategies that eventually return `NaN`.
 - **Randomness**: Jitter-based strategies use `Math.random()`, which is not cryptographically secure
 - **Timing precision**: Actual delays may vary slightly due to JavaScript event loop timing
 

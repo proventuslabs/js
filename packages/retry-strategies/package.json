@@ -1,7 +1,7 @@
 {
 	"name": "@proventuslabs/retry-strategies",
 	"description": "A collection of delay strategies —including backoff and jitter algorithms— for retries, polling, and rate-limited operations.",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"author": "vabatta",
 	"bugs": "https://github.com/proventuslabs/js/issues",
 	"devDependencies": {

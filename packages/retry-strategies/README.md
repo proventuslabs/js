@@ -128,7 +128,7 @@ Increases the delay exponentially using the AWS algorithm.
 
 ```typescript
 const strategy = exponential(100, 5000);
-// base: 100, cap: 5000 (optional, default: Infinity)
+// base: 100 (optional, default: 0), cap: 5000 (optional, default: Infinity)
 // Delays: 100ms, 200ms, 400ms, 800ms, 1600ms, 3200ms, 5000ms...
 ```
 
@@ -150,7 +150,7 @@ Increases the delay following the Fibonacci sequence.
 
 ```typescript
 const strategy = fibonacci(100, 10000);
-// base: 100, cap: 10000 (default: Infinity)
+// base: 100 (optional, default: 0), cap: 10000 (optional, default: Infinity)
 // Delays: 100ms, 100ms, 200ms, 300ms, 500ms, 800ms, 1300ms, 2100ms...
 ```
 
@@ -161,7 +161,7 @@ AWS FullJitter algorithm - adds randomness to exponential backoff.
 
 ```typescript
 const strategy = fullJitter(100, 5000);
-// base: 100, cap: 5000 (default: Infinity)
+// base: 100 (optional, default: 0), cap: 5000 (optional, default: Infinity)
 // Delays: random values between 0 and exponential cap
 ```
 
@@ -172,7 +172,7 @@ AWS EqualJitter algorithm - balances consistency and randomness.
 
 ```typescript
 const strategy = equalJitter(100, 5000);
-// base: 100, cap: 5000 (default: Infinity)
+// base: 100 (optional, default: 0), cap: 5000 (optional, default: Infinity)
 ```
 
 ### `DecorrelatedJitterBackoff` / `decorrelatedJitter()`
@@ -182,7 +182,7 @@ AWS DecorrelatedJitter algorithm - each delay based on previous delay.
 
 ```typescript
 const strategy = decorrelatedJitter(100, 10000);
-// base: 100, cap: 10000 (default: Infinity)
+// base: 100 (optional, default: 0), cap: 10000 (optional, default: Infinity)
 ```
 
 ### `ConstantBackoff` / `constant()`

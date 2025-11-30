@@ -197,6 +197,30 @@ suite("Fibonacci backoff strategy (Unit)", () => {
 				"should continue growing without artificial cap",
 			); // 500
 		});
+
+		test("uses default base when not provided", (ctx: TestContext) => {
+			ctx.plan(3);
+
+			// Arrange
+			const backoff = new FibonacciBackoff();
+
+			// Act & Assert
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms on first call with default base",
+			); // base = 0
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms on second call with default base",
+			); // 0 + 0 = 0
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms on third call with default base",
+			); // 0 + 0 = 0
+		});
 	});
 
 	describe("strategy reset", () => {

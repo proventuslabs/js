@@ -41,6 +41,31 @@ suite("Decorrelated jitter backoff strategy (Unit)", () => {
 			);
 		});
 
+		test("uses default base when not provided", (ctx: TestContext) => {
+			ctx.plan(3);
+
+			// Arrange
+			const backoff = new DecorrelatedJitterBackoff();
+
+			// Act & Assert
+			// With base = 0, random(0, 0) = 0
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms on first call with default base",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms on second call with default base",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms on third call with default base",
+			);
+		});
+
 		test("returns delays based on previous delay", (ctx: TestContext) => {
 			ctx.plan(5);
 

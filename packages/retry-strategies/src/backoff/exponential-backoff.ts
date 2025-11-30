@@ -15,11 +15,11 @@ export class ExponentialBackoff implements BackoffStrategy {
 	/**
 	 * Creates a new ExponentialBackoff instance.
 	 *
-	 * @param base - Base delay in milliseconds (>= 0)
+	 * @param base - Base delay in milliseconds (>= 0, default: 0)
 	 * @param cap - Maximum delay in milliseconds (>= base, default: Infinity)
 	 * @throws {RangeError} If base or cap is invalid
 	 */
-	public constructor(base: number, cap: number = Number.POSITIVE_INFINITY) {
+	public constructor(base: number = 0, cap: number = Number.POSITIVE_INFINITY) {
 		if (Number.isNaN(base)) {
 			throw new RangeError(`Base must not be NaN`);
 		}
@@ -64,7 +64,7 @@ export class ExponentialBackoff implements BackoffStrategy {
  * Increases the delay exponentially using the AWS algorithm.
  * Formula: `min(cap, base * 2^n)`
  *
- * @param base - Base delay in milliseconds (>= 0)
+ * @param base - Base delay in milliseconds (>= 0, default: 0)
  * @param cap - Maximum delay in milliseconds (>= base, default: Infinity)
  * @returns ExponentialBackoff instance
  * @throws {RangeError} If base or cap is invalid
@@ -72,6 +72,6 @@ export class ExponentialBackoff implements BackoffStrategy {
  * @see {@link https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/ AWS Exponential Backoff And Jitter}
  */
 export const exponential = (
-	base: number,
+	base: number = 0,
 	cap: number = Number.POSITIVE_INFINITY,
 ): ExponentialBackoff => new ExponentialBackoff(base, cap);

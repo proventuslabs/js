@@ -16,11 +16,11 @@ export class EqualJitterBackoff implements BackoffStrategy {
 	/**
 	 * Creates a new EqualJitterBackoff instance.
 	 *
-	 * @param base - Base delay in milliseconds (>= 0)
+	 * @param base - Base delay in milliseconds (>= 0, default: 0)
 	 * @param cap - Maximum delay in milliseconds (>= base, default: Infinity)
 	 * @throws {RangeError} If base or cap is invalid
 	 */
-	public constructor(base: number, cap: number = Number.POSITIVE_INFINITY) {
+	public constructor(base: number = 0, cap: number = Number.POSITIVE_INFINITY) {
 		if (Number.isNaN(base)) {
 			throw new RangeError(`Base must not be NaN`);
 		}
@@ -69,7 +69,7 @@ export class EqualJitterBackoff implements BackoffStrategy {
  *
  * Provides more predictable timing than FullJitter while still preventing thundering herd.
  *
- * @param base - Base delay in milliseconds (>= 0)
+ * @param base - Base delay in milliseconds (>= 0, default: 0)
  * @param cap - Maximum delay in milliseconds (>= base, default: Infinity)
  * @returns EqualJitterBackoff instance
  * @throws {RangeError} If base or cap is invalid
@@ -77,6 +77,6 @@ export class EqualJitterBackoff implements BackoffStrategy {
  * @see {@link https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/ AWS Exponential Backoff And Jitter}
  */
 export const equalJitter = (
-	base: number,
+	base: number = 0,
 	cap: number = Number.POSITIVE_INFINITY,
 ): EqualJitterBackoff => new EqualJitterBackoff(base, cap);

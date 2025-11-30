@@ -38,6 +38,31 @@ suite("Equal jitter backoff strategy (Unit)", () => {
 			);
 		});
 
+		test("uses default base when not provided", (ctx: TestContext) => {
+			ctx.plan(3);
+
+			// Arrange
+			const backoff = new EqualJitterBackoff();
+
+			// Act & Assert
+			// With base = 0, temp = 0, so (0/2) + random(0, 0/2) = 0
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms on first call with default base",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms on second call with default base",
+			);
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms on third call with default base",
+			);
+		});
+
 		test("returns delays that are half deterministic and half random", (ctx: TestContext) => {
 			ctx.plan(5);
 

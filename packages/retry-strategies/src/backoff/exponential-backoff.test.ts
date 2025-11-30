@@ -152,6 +152,30 @@ suite("Exponential backoff strategy (Unit)", () => {
 				"should continue growing without artificial cap",
 			); // 100 * 2^3 = 800
 		});
+
+		test("uses default base when not provided", (ctx: TestContext) => {
+			ctx.plan(3);
+
+			// Arrange
+			const backoff = new ExponentialBackoff();
+
+			// Act & Assert
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms on first call with default base",
+			); // 0 * 2^0 = 0
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms on second call with default base",
+			); // 0 * 2^1 = 0
+			ctx.assert.strictEqual(
+				backoff.nextBackoff(),
+				0,
+				"should return 0ms on third call with default base",
+			); // 0 * 2^2 = 0
+		});
 	});
 
 	describe("strategy reset", () => {

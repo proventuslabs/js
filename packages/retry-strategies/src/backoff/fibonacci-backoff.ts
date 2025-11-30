@@ -14,11 +14,11 @@ export class FibonacciBackoff implements BackoffStrategy {
 	/**
 	 * Creates a new FibonacciBackoff instance.
 	 *
-	 * @param base - Base delay in milliseconds (>= 0)
+	 * @param base - Base delay in milliseconds (>= 0, default: 0)
 	 * @param cap - Maximum delay in milliseconds (>= base, default: Infinity)
 	 * @throws {RangeError} If base or cap is invalid
 	 */
-	public constructor(base: number, cap: number = Number.POSITIVE_INFINITY) {
+	public constructor(base: number = 0, cap: number = Number.POSITIVE_INFINITY) {
 		if (Number.isNaN(base)) {
 			throw new RangeError(`Base must not be NaN`);
 		}
@@ -70,12 +70,12 @@ export class FibonacciBackoff implements BackoffStrategy {
  * Increases the delay following the Fibonacci sequence.
  * Formula: `min(cap, base * fib(n))`
  *
- * @param base - Base delay in milliseconds (>= 0)
+ * @param base - Base delay in milliseconds (>= 0, default: 0)
  * @param cap - Maximum delay in milliseconds (>= base, default: Infinity)
  * @returns FibonacciBackoff instance
  * @throws {RangeError} If base or cap is invalid
  */
 export const fibonacci = (
-	base: number,
+	base: number = 0,
 	cap: number = Number.POSITIVE_INFINITY,
 ): FibonacciBackoff => new FibonacciBackoff(base, cap);

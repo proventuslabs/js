@@ -1,15 +1,14 @@
 import type { BackoffStrategy } from "../backoff/interface.ts";
 
 /**
- * Limits a backoff strategy to a maximum number of retry attempts.
- * Once the limit is reached, `nextBackoff()` returns `NaN` to stop retrying.
+ * Limits a strategy to a maximum number of retry attempts.
+ * Returns `NaN` once the limit is reached to stop retrying.
  *
  * @example
  * ```ts
- * import { ExponentialBackoff, UptoBackoff } from '@proventuslabs/retry-strategies';
+ * import { exponential, upto } from '@proventuslabs/retry-strategies';
  *
- * const exponential = new ExponentialBackoff(100, 5000);
- * const limited = new UptoBackoff(3, exponential);
+ * const limited = upto(3, exponential(100, 5000));
  *
  * limited.nextBackoff(); // Returns delay from exponential
  * limited.nextBackoff(); // Returns delay from exponential
@@ -25,9 +24,9 @@ export class UptoBackoff<T extends BackoffStrategy> implements BackoffStrategy {
 	/**
 	 * Creates a new UptoBackoff instance.
 	 *
-	 * @param retries - Maximum number of retry attempts allowed (must be >= 0 and an integer)
-	 * @param strategy - The underlying backoff strategy to wrap
-	 * @throws {RangeError} If retries is NaN, not an integer, or less than 0
+	 * @param retries - Maximum retry attempts (integer >= 0)
+	 * @param strategy - Strategy to wrap
+	 * @throws {RangeError} If retries is invalid (NaN, non-integer, or < 0)
 	 */
 	public constructor(retries: number, strategy: T) {
 		if (Number.isNaN(retries)) {
@@ -49,10 +48,9 @@ export class UptoBackoff<T extends BackoffStrategy> implements BackoffStrategy {
 
 	/**
 	 * Calculate the next backoff delay.
-	 * Returns the delay from the underlying strategy until the retry limit is reached,
-	 * then returns NaN to stop retrying.
+	 * Delegates to the underlying strategy until the limit is reached, then returns `NaN`.
 	 *
-	 * @returns The next delay in milliseconds from the underlying strategy, or NaN if retries exhausted
+	 * @returns Delay from underlying strategy, or `NaN` if retries exhausted
 	 */
 	nextBackoff(): number {
 		if (this.attemptsLeft-- <= 0) return NaN;
@@ -62,7 +60,7 @@ export class UptoBackoff<T extends BackoffStrategy> implements BackoffStrategy {
 
 	/**
 	 * Reset to the initial state.
-	 * Resets both the retry counter and the underlying strategy.
+	 * Resets the retry counter and the underlying strategy.
 	 */
 	resetBackoff(): void {
 		this.attemptsLeft = this.retries;
@@ -71,14 +69,15 @@ export class UptoBackoff<T extends BackoffStrategy> implements BackoffStrategy {
 }
 
 /**
- * Limits a backoff strategy to a maximum number of retry attempts.
- * Once the limit is reached, `nextBackoff()` returns `NaN` to stop retrying.
+ * Limits a strategy to a maximum number of retry attempts.
+ * Returns `NaN` once the limit is reached to stop retrying.
  *
- * @param retries - Maximum number of retry attempts allowed (must be >= 0 and an integer)
- * @param strategy - The underlying backoff strategy to wrap
- * @returns A new UptoBackoff instance that stops after the specified number of retries
+ * @template T - Wrapped strategy
+ * @param retries - Maximum retry attempts (integer >= 0)
+ * @param strategy - Strategy to wrap
+ * @returns Strategy that stops after specified retries
  *
- * @throws {RangeError} If retries is NaN, not an integer, or less than 0
+ * @throws {RangeError} If retries is invalid (NaN, non-integer, or < 0)
  */
 export const upto = <T extends BackoffStrategy>(
 	retries: number,

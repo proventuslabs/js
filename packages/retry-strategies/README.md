@@ -44,60 +44,59 @@ const result = await retry(
 
 ### `retry(fn, options)`
 
-Attempts to execute a function repeatedly according to a backoff strategy until it succeeds, a provided stop condition is met, or an optional AbortSignal is triggered.
+Executes a function repeatedly according to a backoff strategy until it succeeds, stops, or is aborted.
 
 #### Parameters
 
-- **`fn`** `() => T | Promise<T>` - The function to retry. Can be synchronous or return a promise.
-- **`options`** `RetryOptions` - Configuration options:
-  - **`strategy`** `BackoffStrategy` - Strategy for calculating delays between retries (required)
-  - **`stop`** `(error: unknown, attempt: number) => boolean` - Optional function to determine whether to stop retrying. Return `true` to stop. (default: `() => false`)
-  - **`signal`** `AbortSignal` - Optional AbortSignal to cancel the retry operation (default: `undefined`)
+- **`fn`** `() => T | Promise<T>` - The function to retry
+- **`options`** `RetryOptions` - Configuration:
+  - **`strategy`** `BackoffStrategy` - Delay calculation strategy (required)
+  - **`stop`** `(error: unknown, attempt: number) => boolean` - Stop condition (default: `() => false`)
+  - **`signal`** `AbortSignal` - Cancellation signal (optional)
 
 #### Returns
 
-`Promise<T>` - A promise that resolves with the function's result if it eventually succeeds.
+`Promise<T>` - Resolves with the function's result on success
 
 #### Throws
 
-- **`unknown`** - The last encountered error if retries are exhausted or if the stop function returns `true`
-- **`unknown`** - The reason of the AbortSignal if the operation is aborted (generally `DOMException` `AbortError`)
-- **`RangeError`** - If the backoff strategy returns a delay exceeding INT32_MAX (2147483647ms, approximately 24.8 days)
+- **`unknown`** - Last error if retries exhausted, stop condition met, or aborted
+- **`RangeError`** - If delay exceeds INT32_MAX (2147483647ms)
 
 ### `waitFor(delay, signal?)`
 
-Waits for the specified amount of time or until an optional AbortSignal is triggered.
+Waits for a specified duration or until aborted.
 
 #### Parameters
 
-- **`delay`** `number` - Duration to wait in milliseconds. Negative values are treated as zero.
-- **`signal`** `AbortSignal` - Optional AbortSignal to cancel the wait.
+- **`delay`** `number` - Wait duration in milliseconds (negative treated as zero)
+- **`signal`** `AbortSignal` - Cancellation signal (optional)
 
 #### Returns
 
-`Promise<void>` - A promise that resolves after the delay has elapsed or rejects if the signal is aborted.
+`Promise<void>` - Resolves after delay or rejects if aborted
 
 #### Throws
 
-- **`unknown`** - The reason of the AbortSignal if the operation is aborted (generally `DOMException` `AbortError`)
-- **`RangeError`** - If the delay exceeds INT32_MAX (2147483647ms, approximately 24.8 days)
+- **`unknown`** - Abort reason if cancelled
+- **`RangeError`** - If delay exceeds INT32_MAX (2147483647ms)
 
 ### `upto(retries, strategy)`
 
-Limits a backoff strategy to a maximum number of retry attempts. Once the limit is reached, `nextBackoff()` returns `NaN` to stop retrying.
+Limits a strategy to a maximum number of retry attempts.
 
 #### Parameters
 
-- **`retries`** `number` - Maximum number of retry attempts allowed (must be >= 0 and an integer)
-- **`strategy`** `BackoffStrategy` - The underlying backoff strategy to wrap
+- **`retries`** `number` - Maximum retry attempts (integer >= 0)
+- **`strategy`** `BackoffStrategy` - Strategy to wrap
 
 #### Returns
 
-`UptoBackoff<T>` - A new UptoBackoff instance that stops after the specified number of retries
+`UptoBackoff<T>` - Strategy that stops after specified retries
 
 #### Throws
 
-- **`RangeError`** - If retries is NaN, not an integer, or less than 0
+- **`RangeError`** - If retries is invalid (NaN, non-integer, or < 0)
 
 ### `BackoffStrategy` Interface
 
@@ -125,108 +124,89 @@ All strategies are available in both class-based and functional styles. Examples
 ### `ExponentialBackoff` / `exponential()`
 
 Increases the delay exponentially using the AWS algorithm.
-
 **Formula:** `min(cap, base * 2^n)`
 
 ```typescript
 const strategy = exponential(100, 5000);
-// Parameters:
-//   base: 100       - base delay in ms
-//   cap: 5000       - cap (maximum delay) in ms (optional, defaults to Infinity)
-// Delays: 100ms, 200ms, 400ms, 800ms, 1600ms, 3200ms, 5000ms, 5000ms...
+// base: 100, cap: 5000 (optional, default: Infinity)
+// Delays: 100ms, 200ms, 400ms, 800ms, 1600ms, 3200ms, 5000ms...
 ```
 
 ### `LinearBackoff` / `linear()`
 
-Increases the delay linearly by a fixed increment on each retry.
-
+Increases the delay linearly by a fixed increment.
 **Formula:** `min(cap, initialDelay + (increment * n))`
 
 ```typescript
 const strategy = linear(1000, 500, 10000);
-// Parameters:
-//   increment: 1000       - increment in ms
-//   initialDelay: 500     - initial delay in ms (optional, default: 0)
-//   cap: 10000            - cap (maximum delay) in ms (optional, defaults to Infinity)
+// increment: 1000, initialDelay: 500 (default: 0), cap: 10000 (default: Infinity)
 // Delays: 500ms, 1500ms, 2500ms, 3500ms, 4500ms...
 ```
 
 ### `FibonacciBackoff` / `fibonacci()`
 
 Increases the delay following the Fibonacci sequence.
-
 **Formula:** `min(cap, base * fib(n))`
 
 ```typescript
 const strategy = fibonacci(100, 10000);
-// Parameters:
-//   base: 100       - base delay in ms
-//   cap: 10000      - cap (maximum delay) in ms (optional, defaults to Infinity)
+// base: 100, cap: 10000 (default: Infinity)
 // Delays: 100ms, 100ms, 200ms, 300ms, 500ms, 800ms, 1300ms, 2100ms...
 ```
 
 ### `FullJitterBackoff` / `fullJitter()`
 
-Uses the AWS FullJitter algorithm to add randomness to exponential backoff, preventing thundering herd problems.
-
+AWS FullJitter algorithm - adds randomness to exponential backoff.
 **Formula:** `random(0, min(cap, base * 2^n))`
 
 ```typescript
 const strategy = fullJitter(100, 5000);
-// Parameters:
-//   base: 100       - base delay in ms
-//   cap: 5000       - cap (maximum delay) in ms (optional, defaults to Infinity)
-// Delays: random values between 0 and the exponential cap
+// base: 100, cap: 5000 (default: Infinity)
+// Delays: random values between 0 and exponential cap
 ```
 
 ### `EqualJitterBackoff` / `equalJitter()`
 
-Uses the AWS EqualJitter algorithm, providing a balanced approach between exponential backoff and full jitter.
-
+AWS EqualJitter algorithm - balances consistency and randomness.
 **Formula:** `(min(cap, base * 2^n) / 2) + random(0, min(cap, base * 2^n) / 2)`
 
 ```typescript
 const strategy = equalJitter(100, 5000);
-// Parameters:
-//   base: 100       - base delay in ms
-//   cap: 5000       - cap (maximum delay) in ms (optional, defaults to Infinity)
+// base: 100, cap: 5000 (default: Infinity)
 ```
 
 ### `DecorrelatedJitterBackoff` / `decorrelatedJitter()`
 
-Uses the AWS Decorrelated Jitter algorithm, where each delay is based on the previous delay rather than attempt count.
-
+AWS DecorrelatedJitter algorithm - each delay based on previous delay.
 **Formula:** `min(cap, random(base, previousDelay * 3))`
 
 ```typescript
 const strategy = decorrelatedJitter(100, 10000);
-// Parameters:
-//   base: 100       - base delay in ms
-//   cap: 10000      - cap (maximum delay) in ms (optional, defaults to Infinity)
+// base: 100, cap: 10000 (default: Infinity)
 ```
 
 ### `ConstantBackoff` / `constant()`
 
-Always returns the same backoff delay, useful for fixed-interval polling.
+Always returns the same delay.
 
 ```typescript
-const strategy = constant(1000); // Always 1000ms
+const strategy = constant(1000);
 ```
 
 ### `ZeroBackoff` / `zero()`
 
-Always returns zero delay, useful for immediate retries without waiting.
+Always returns zero delay for immediate retries.
 
 ```typescript
-const strategy = zero(); // Always 0ms
+const strategy = zero();
 ```
 
 ### `StopBackoff` / `stop()`
 
-Always returns `NaN`, indicating that no retries should be made.
+Always returns `NaN` to prevent retries.
 
 ```typescript
-const strategy = stop(); // Never retries
+const strategy = stop();
 ```
 
 ## Behavior
@@ -242,13 +222,13 @@ The retry loop continues indefinitely until one of these conditions is met:
 
 ### Edge Cases
 
-- **Negative delays**: Treated as zero (no wait)
-- **NaN from strategy**: Immediately stops retrying and throws the last error
-- **Delays exceeding INT32_MAX**: Throws `RangeError` before attempting the wait
+- **Negative delays**: Treated as zero
+- **NaN from strategy**: Stops retrying and throws last error
+- **Delays exceeding INT32_MAX**: Throws `RangeError`
 
 ### Concurrency Safety
 
-**Important:** The `retry` function is not concurrently safe when using stateful strategies. If you need to retry multiple operations in parallel, create separate strategy instances for each retry operation:
+**Important:** Not safe to share stateful strategies across concurrent `retry` operations. Create separate instances:
 
 ```typescript
 // ❌ Not safe - shared strategy
@@ -276,14 +256,12 @@ async function fetchUserData(userId: string) {
   return retry(
     async () => {
       const response = await fetch(`/api/users/${userId}`);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
     },
     {
       strategy: upto(5, exponential(100, 5000)),
-      stop: (error) => error.message.includes("HTTP 4") // Stop on client errors
+      stop: (error) => error.message.includes("HTTP 4")
     }
   );
 }
@@ -302,7 +280,7 @@ async function callRateLimitedAPI(endpoint: string) {
       return response.json();
     },
     {
-      strategy: fullJitter(1000, 30000), // Jitter prevents thundering herd
+      strategy: fullJitter(1000, 30000),
       stop: (error) => !error.message.includes("Rate limited")
     }
   );
@@ -332,10 +310,9 @@ async function fetchWithTimeout(url: string, timeoutMs: number) {
 ## Limitations
 
 - **Maximum delay**: Delays cannot exceed INT32_MAX (2147483647ms, approximately 24.8 days) due to `setTimeout` limitations
-- **Not concurrency-safe**: Stateful strategies should not be shared across concurrent `retry` operations
-- **No built-in attempt limit**: The `retry` function will continue indefinitely unless the strategy exhausts, the stop function returns `true`, or an abort signal is triggered. Use the `upto()` utility to limit attempts, provide a stop condition, or use strategies that eventually return `NaN`.
-- **Randomness**: Jitter-based strategies use `Math.random()`, which is not cryptographically secure
-- **Timing precision**: Actual delays may vary slightly due to JavaScript event loop timing
+- **Not concurrency-safe**: Don't share stateful strategies across concurrent operations
+- **No built-in attempt limit**: Use the `upto()` utility to limit attempts, provide a `retry` stop condition, or use strategies that eventually return `NaN`
+- **Randomness**: Jitter-based strategies use `Math.random()`
 
 ## Standards References
 

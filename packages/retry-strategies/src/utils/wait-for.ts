@@ -5,14 +5,14 @@
 export const INT32_MAX = 0x7fffffff;
 
 /**
- * Waits for the specified amount of time or until an optional AbortSignal is triggered.
+ * Waits for a specified duration or until aborted.
  *
- * @param delay - Duration to wait in milliseconds. Negative values are treated as zero.
- * @param signal - Optional AbortSignal to cancel the wait. If the signal is aborted, the returned promise is rejected with `signal.reason`.
- * @returns A promise that resolves after the delay has elapsed or rejects if the signal is aborted.
+ * @param delay - Wait duration in milliseconds (negative treated as zero)
+ * @param signal - Cancellation signal (optional)
+ * @returns Resolves after delay or rejects if aborted
  *
- * @throws {unknown} The reason of the AbortSignal if the operation is aborted (generally {@link DOMException} `AbortError`).
- * @throws {RangeError} If the delay exceeds INT32_MAX (2147483647ms, approximately 24.8 days).
+ * @throws {unknown} Abort reason if cancelled
+ * @throws {RangeError} If delay exceeds INT32_MAX (2147483647ms)
  *
  * @example
  * ```ts

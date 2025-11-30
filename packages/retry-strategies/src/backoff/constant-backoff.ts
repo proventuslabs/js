@@ -1,7 +1,7 @@
 import type { BackoffStrategy } from "./interface.ts";
 
 /**
- * A backoff policy that always returns the same backoff delay.
+ * Always returns the same delay.
  */
 export class ConstantBackoff implements BackoffStrategy {
 	private readonly delay: number;
@@ -9,8 +9,8 @@ export class ConstantBackoff implements BackoffStrategy {
 	/**
 	 * Creates a new ConstantBackoff instance.
 	 *
-	 * @param delay - The constant delay in milliseconds to return for each backoff (must be >= 0)
-	 * @throws {RangeError} If delay is NaN or less than 0
+	 * @param delay - Constant delay in milliseconds (>= 0)
+	 * @throws {RangeError} If delay is invalid
 	 */
 	public constructor(delay: number) {
 		if (Number.isNaN(delay)) {
@@ -24,9 +24,8 @@ export class ConstantBackoff implements BackoffStrategy {
 
 	/**
 	 * Calculate the next backoff delay.
-	 * Always returns the configured constant delay.
 	 *
-	 * @returns The constant delay in milliseconds
+	 * @returns Constant delay in milliseconds
 	 */
 	public nextBackoff(): number {
 		return this.delay;
@@ -34,7 +33,6 @@ export class ConstantBackoff implements BackoffStrategy {
 
 	/**
 	 * Reset to the initial state.
-	 * Since ConstantBackoff has no mutable state, this is a no-op.
 	 */
 	public resetBackoff(): void {
 		// No-op: ConstantBackoff has no mutable state to reset
@@ -42,12 +40,11 @@ export class ConstantBackoff implements BackoffStrategy {
 }
 
 /**
- * A backoff policy that always returns the same backoff delay.
+ * Always returns the same delay.
  *
- * @param delay - The constant delay in milliseconds to return for each backoff (must be >= 0)
- * @returns A new ConstantBackoff instance
- *
- * @throws {RangeError} If delay is NaN or less than 0
+ * @param delay - Constant delay in milliseconds (>= 0)
+ * @returns ConstantBackoff instance
+ * @throws {RangeError} If delay is invalid
  */
 export const constant = (delay: number): ConstantBackoff =>
 	new ConstantBackoff(delay);

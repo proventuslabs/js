@@ -1,12 +1,10 @@
 import type { BackoffStrategy } from "./interface.ts";
 
 /**
- * A backoff policy that uses the AWS EqualJitter algorithm.
+ * AWS EqualJitter algorithm - balances consistency and randomness.
+ * Provides more predictable timing than FullJitter while still preventing thundering herd.
  *
- * The delay for attempt n is: temp = min(cap, base * 2 ** n), then delay = temp / 2 + random(0, temp / 2)
- *
- * This strategy balances between consistent delays and randomness to prevent thundering herd problems
- * while maintaining more predictable timing than FullJitter.
+ * Formula: `(min(cap, base * 2^n) / 2) + random(0, min(cap, base * 2^n) / 2)`
  *
  * @see {@link https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/ AWS Exponential Backoff And Jitter}
  */
@@ -18,9 +16,9 @@ export class EqualJitterBackoff implements BackoffStrategy {
 	/**
 	 * Creates a new EqualJitterBackoff instance.
 	 *
-	 * @param base - The base delay in milliseconds (must be >= 0)
-	 * @param cap - The maximum delay in milliseconds (must be >= base, defaults to Infinity)
-	 * @throws {RangeError} If base or cap is NaN or invalid
+	 * @param base - Base delay in milliseconds (>= 0)
+	 * @param cap - Maximum delay in milliseconds (>= base, default: Infinity)
+	 * @throws {RangeError} If base or cap is invalid
 	 */
 	public constructor(base: number, cap: number = Number.POSITIVE_INFINITY) {
 		if (Number.isNaN(base)) {
@@ -46,9 +44,8 @@ export class EqualJitterBackoff implements BackoffStrategy {
 
 	/**
 	 * Calculate the next backoff delay.
-	 * Returns a delay that is half deterministic and half random.
 	 *
-	 * @returns The next delay in milliseconds: temp / 2 + random(0, temp / 2), where temp = min(cap, base * 2 ** attemptCount)
+	 * @returns Delay in milliseconds: `(temp / 2) + random(0, temp / 2)` where `temp = min(cap, base * 2^n)`
 	 */
 	public nextBackoff(): number {
 		const temp = Math.min(this.cap, this.base * 2 ** this.attemptCount);
@@ -60,7 +57,6 @@ export class EqualJitterBackoff implements BackoffStrategy {
 
 	/**
 	 * Reset to the initial state.
-	 * Resets the attempt counter to 0, so the next call to nextBackoff will use attempt 0.
 	 */
 	public resetBackoff(): void {
 		this.attemptCount = 0;
@@ -68,17 +64,15 @@ export class EqualJitterBackoff implements BackoffStrategy {
 }
 
 /**
- * A backoff policy that uses the AWS EqualJitter algorithm.
- * The delay for attempt n is: temp = min(cap, base * 2 ** n), then delay = temp / 2 + random(0, temp / 2)
+ * AWS EqualJitter algorithm - balances consistency and randomness.
+ * Formula: `(min(cap, base * 2^n) / 2) + random(0, min(cap, base * 2^n) / 2)`
  *
- * This strategy balances between consistent delays and randomness to prevent thundering herd problems
- * while maintaining more predictable timing than FullJitter.
+ * Provides more predictable timing than FullJitter while still preventing thundering herd.
  *
- * @param base - The base delay in milliseconds (must be >= 0)
- * @param cap - The maximum delay in milliseconds (must be >= base, defaults to Infinity)
- * @returns A new EqualJitterBackoff instance
- *
- * @throws {RangeError} If base or cap is NaN or invalid
+ * @param base - Base delay in milliseconds (>= 0)
+ * @param cap - Maximum delay in milliseconds (>= base, default: Infinity)
+ * @returns EqualJitterBackoff instance
+ * @throws {RangeError} If base or cap is invalid
  *
  * @see {@link https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/ AWS Exponential Backoff And Jitter}
  */

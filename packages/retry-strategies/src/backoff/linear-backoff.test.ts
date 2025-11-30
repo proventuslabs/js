@@ -1,6 +1,6 @@
 import { describe, suite, type TestContext, test } from "node:test";
 
-import { LinearBackoff } from "./linear-backoff.ts";
+import { LinearBackoff, linear } from "./linear-backoff.ts";
 
 /* node:coverage disable */
 suite("Linear backoff strategy (Unit)", () => {
@@ -459,6 +459,31 @@ suite("Linear backoff strategy (Unit)", () => {
 			ctx.assert.doesNotThrow(
 				() => new LinearBackoff(100, 500, 500),
 				"should accept cap equal to initial delay",
+			);
+		});
+	});
+
+	describe("factory function", () => {
+		test("creates LinearBackoff instance", (ctx: TestContext) => {
+			ctx.plan(3);
+
+			// Arrange & Act
+			const strategy = linear(100, 500);
+
+			// Assert
+			ctx.assert.ok(
+				strategy instanceof LinearBackoff,
+				"should return LinearBackoff instance",
+			);
+			ctx.assert.strictEqual(
+				strategy.nextBackoff(),
+				500,
+				"should work correctly",
+			);
+			ctx.assert.strictEqual(
+				strategy.nextBackoff(),
+				600,
+				"should maintain state correctly",
 			);
 		});
 	});

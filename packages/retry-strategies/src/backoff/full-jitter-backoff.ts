@@ -65,3 +65,23 @@ export class FullJitterBackoff implements BackoffStrategy {
 		this.attemptCount = 0;
 	}
 }
+
+/**
+ * A backoff policy that uses the AWS FullJitter algorithm.
+ * The delay for attempt n is: random(0, min(cap, base * 2 ** n))
+ *
+ * This strategy adds randomness to exponential backoff to prevent thundering herd problems
+ * where multiple clients retry at the same time.
+ *
+ * @param base - The base delay in milliseconds (must be >= 0)
+ * @param cap - The maximum delay in milliseconds (must be >= base, defaults to Infinity)
+ * @returns A new FullJitterBackoff instance
+ *
+ * @throws {RangeError} If base or cap is NaN or invalid
+ *
+ * @see {@link https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/ AWS Exponential Backoff And Jitter}
+ */
+export const fullJitter = (
+	base: number,
+	cap: number = Number.POSITIVE_INFINITY,
+): FullJitterBackoff => new FullJitterBackoff(base, cap);

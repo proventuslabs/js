@@ -73,3 +73,24 @@ export class FibonacciBackoff implements BackoffStrategy {
 		this.currentDelay = this.base;
 	}
 }
+
+/**
+ * A backoff policy that increases the delay following the Fibonacci sequence.
+ * The delay for each attempt follows: base, base, 2*base, 3*base, 5*base, 8*base, 13*base...
+ * The sequence is capped at a maximum delay value.
+ *
+ * @param base - The base delay in milliseconds (must be >= 0)
+ * @param cap - The maximum delay in milliseconds (must be >= base, defaults to Infinity)
+ * @returns A new FibonacciBackoff instance
+ *
+ * @throws {RangeError} If base or cap is NaN or invalid
+ *
+ * @remarks
+ * After an extremely large number of retry attempts (~90+ iterations),
+ * floating-point precision may be lost in Fibonacci calculations. In practice, this is not
+ * a concern as the cap will have been reached long before precision loss occurs.
+ */
+export const fibonacci = (
+	base: number,
+	cap: number = Number.POSITIVE_INFINITY,
+): FibonacciBackoff => new FibonacciBackoff(base, cap);

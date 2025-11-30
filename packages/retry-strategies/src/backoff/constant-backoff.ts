@@ -40,3 +40,14 @@ export class ConstantBackoff implements BackoffStrategy {
 		// No-op: ConstantBackoff has no mutable state to reset
 	}
 }
+
+/**
+ * A backoff policy that always returns the same backoff delay.
+ *
+ * @param delay - The constant delay in milliseconds to return for each backoff (must be >= 0)
+ * @returns A new ConstantBackoff instance
+ *
+ * @throws {RangeError} If delay is NaN or less than 0
+ */
+export const constant = (delay: number): ConstantBackoff =>
+	new ConstantBackoff(delay);

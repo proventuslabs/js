@@ -23,3 +23,11 @@ export class ZeroBackoff implements BackoffStrategy {
 		// No-op: ZeroBackoff has no state to reset
 	}
 }
+
+/**
+ * A fixed backoff policy whose backoff time is always zero,
+ * meaning that the operation is retried immediately without waiting, indefinitely.
+ *
+ * @returns A new ZeroBackoff instance
+ */
+export const zero = (): ZeroBackoff => new ZeroBackoff();

@@ -69,3 +69,24 @@ export class DecorrelatedJitterBackoff implements BackoffStrategy {
 		this.previousDelay = this.base;
 	}
 }
+
+/**
+ * A backoff policy that uses the AWS DecorrelatedJitter algorithm.
+ * The delay for attempt n is: min(cap, random(base, previous_delay * 3))
+ *
+ * This strategy decorrelates the retry attempts from each other, making the delays
+ * unpredictable and helping to avoid synchronization between multiple clients.
+ * It generally results in shorter overall wait times compared to other strategies.
+ *
+ * @param base - The base delay in milliseconds (must be >= 0)
+ * @param cap - The maximum delay in milliseconds (must be >= base, defaults to Infinity)
+ * @returns A new DecorrelatedJitterBackoff instance
+ *
+ * @throws {RangeError} If base or cap is NaN or invalid
+ *
+ * @see {@link https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/ AWS Exponential Backoff And Jitter}
+ */
+export const decorrelatedJitter = (
+	base: number,
+	cap: number = Number.POSITIVE_INFINITY,
+): DecorrelatedJitterBackoff => new DecorrelatedJitterBackoff(base, cap);

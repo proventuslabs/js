@@ -1,6 +1,6 @@
 import { describe, suite, type TestContext, test } from "node:test";
 
-import { ExponentialBackoff } from "./exponential-backoff.ts";
+import { ExponentialBackoff, exponential } from "./exponential-backoff.ts";
 
 /* node:coverage disable */
 suite("Exponential backoff strategy (Unit)", () => {
@@ -324,6 +324,31 @@ suite("Exponential backoff strategy (Unit)", () => {
 			ctx.assert.doesNotThrow(
 				() => new ExponentialBackoff(100),
 				"should accept base without cap",
+			);
+		});
+	});
+
+	describe("factory function", () => {
+		test("creates ExponentialBackoff instance", (ctx: TestContext) => {
+			ctx.plan(3);
+
+			// Arrange & Act
+			const strategy = exponential(100, 5000);
+
+			// Assert
+			ctx.assert.ok(
+				strategy instanceof ExponentialBackoff,
+				"should return ExponentialBackoff instance",
+			);
+			ctx.assert.strictEqual(
+				strategy.nextBackoff(),
+				100,
+				"should work correctly",
+			);
+			ctx.assert.strictEqual(
+				strategy.nextBackoff(),
+				200,
+				"should maintain state correctly",
 			);
 		});
 	});

@@ -66,3 +66,25 @@ export class ExponentialBackoff implements BackoffStrategy {
 		this.attemptCount = 0;
 	}
 }
+
+/**
+ * A backoff policy that increases the delay exponentially using the AWS algorithm.
+ * The delay for attempt n is: min(cap, base * 2 ** n)
+ *
+ * @param base - The base delay in milliseconds (must be >= 0)
+ * @param cap - The maximum delay in milliseconds (must be >= base, defaults to Infinity)
+ * @returns A new ExponentialBackoff instance
+ *
+ * @throws {RangeError} If base or cap is NaN or invalid
+ *
+ * @remarks
+ * After an extremely large number of retry attempts (50+ for exponential strategies),
+ * floating-point precision may be lost in delay calculations. In practice, this is not
+ * a concern as the cap will have been reached long before precision loss occurs.
+ *
+ * @see {@link https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/ AWS Exponential Backoff And Jitter}
+ */
+export const exponential = (
+	base: number,
+	cap: number = Number.POSITIVE_INFINITY,
+): ExponentialBackoff => new ExponentialBackoff(base, cap);

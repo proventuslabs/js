@@ -23,3 +23,11 @@ export class StopBackoff implements BackoffStrategy {
 		// No-op: StopBackoff has no state to reset
 	}
 }
+
+/**
+ * A fixed backoff policy that always returns NaN for nextBackoff(),
+ * meaning that the operation should never be retried.
+ *
+ * @returns A new StopBackoff instance
+ */
+export const stop = (): StopBackoff => new StopBackoff();

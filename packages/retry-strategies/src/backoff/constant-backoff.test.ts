@@ -1,6 +1,6 @@
 import { describe, suite, type TestContext, test } from "node:test";
 
-import { ConstantBackoff } from "./constant-backoff.ts";
+import { ConstantBackoff, constant } from "./constant-backoff.ts";
 
 /* node:coverage disable */
 suite("Constant backoff strategy (Unit)", () => {
@@ -177,6 +177,31 @@ suite("Constant backoff strategy (Unit)", () => {
 			ctx.assert.doesNotThrow(
 				() => new ConstantBackoff(Number.MAX_SAFE_INTEGER),
 				"should accept MAX_SAFE_INTEGER delay",
+			);
+		});
+	});
+
+	describe("factory function", () => {
+		test("creates ConstantBackoff instance", (ctx: TestContext) => {
+			ctx.plan(3);
+
+			// Arrange & Act
+			const strategy = constant(1000);
+
+			// Assert
+			ctx.assert.ok(
+				strategy instanceof ConstantBackoff,
+				"should return ConstantBackoff instance",
+			);
+			ctx.assert.strictEqual(
+				strategy.nextBackoff(),
+				1000,
+				"should work correctly",
+			);
+			ctx.assert.strictEqual(
+				strategy.nextBackoff(),
+				1000,
+				"should maintain constant delay",
 			);
 		});
 	});

@@ -1,6 +1,6 @@
 import { describe, suite, type TestContext, test } from "node:test";
 
-import { EqualJitterBackoff } from "./equal-jitter-backoff.ts";
+import { EqualJitterBackoff, equalJitter } from "./equal-jitter-backoff.ts";
 
 /* node:coverage disable */
 suite("Equal jitter backoff strategy (Unit)", () => {
@@ -401,6 +401,27 @@ suite("Equal jitter backoff strategy (Unit)", () => {
 			ctx.assert.doesNotThrow(
 				() => new EqualJitterBackoff(100),
 				"should accept base without cap",
+			);
+		});
+	});
+
+	describe("factory function", () => {
+		test("creates EqualJitterBackoff instance", (ctx: TestContext) => {
+			ctx.plan(2);
+
+			// Arrange & Act
+			const strategy = equalJitter(100, 5000);
+
+			// Assert
+			ctx.assert.ok(
+				strategy instanceof EqualJitterBackoff,
+				"should return EqualJitterBackoff instance",
+			);
+			// Just verify it returns a number (jitter is random)
+			const delay = strategy.nextBackoff();
+			ctx.assert.ok(
+				typeof delay === "number" && delay >= 0,
+				"should work correctly",
 			);
 		});
 	});

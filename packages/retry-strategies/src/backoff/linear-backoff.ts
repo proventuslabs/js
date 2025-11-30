@@ -80,3 +80,20 @@ export class LinearBackoff implements BackoffStrategy {
 		this.attemptCount = 0;
 	}
 }
+
+/**
+ * A backoff policy that increases the delay linearly by a fixed increment on each retry.
+ * The delay for attempt n is: min(cap, initialDelay + (increment * n))
+ *
+ * @param increment - The amount to increase the delay by on each retry (must be >= 0)
+ * @param initialDelay - The initial delay in milliseconds before any increments (must be >= 0, defaults to 0)
+ * @param cap - The maximum delay in milliseconds (must be >= initialDelay, defaults to Infinity)
+ * @returns A new LinearBackoff instance
+ *
+ * @throws {RangeError} If increment, initialDelay, or cap is NaN or invalid
+ */
+export const linear = (
+	increment: number,
+	initialDelay = 0,
+	cap: number = Number.POSITIVE_INFINITY,
+): LinearBackoff => new LinearBackoff(increment, initialDelay, cap);

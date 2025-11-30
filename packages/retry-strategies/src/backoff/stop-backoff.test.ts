@@ -1,6 +1,6 @@
 import { describe, suite, type TestContext, test } from "node:test";
 
-import { StopBackoff } from "./stop-backoff.ts";
+import { StopBackoff, stop } from "./stop-backoff.ts";
 
 /* node:coverage disable */
 suite("Stop backoff strategy (Unit)", () => {
@@ -84,6 +84,29 @@ suite("Stop backoff strategy (Unit)", () => {
 			ctx.assert.ok(
 				Number.isNaN(backoff2.nextBackoff()),
 				"should not affect second instance",
+			);
+		});
+	});
+
+	describe("factory function", () => {
+		test("creates StopBackoff instance", (ctx: TestContext) => {
+			ctx.plan(3);
+
+			// Arrange & Act
+			const strategy = stop();
+
+			// Assert
+			ctx.assert.ok(
+				strategy instanceof StopBackoff,
+				"should return StopBackoff instance",
+			);
+			ctx.assert.ok(
+				Number.isNaN(strategy.nextBackoff()),
+				"should work correctly",
+			);
+			ctx.assert.ok(
+				Number.isNaN(strategy.nextBackoff()),
+				"should always return NaN",
 			);
 		});
 	});

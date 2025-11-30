@@ -1,6 +1,9 @@
 import { describe, suite, type TestContext, test } from "node:test";
 
-import { DecorrelatedJitterBackoff } from "./decorrelated-jitter-backoff.ts";
+import {
+	DecorrelatedJitterBackoff,
+	decorrelatedJitter,
+} from "./decorrelated-jitter-backoff.ts";
 
 /* node:coverage disable */
 suite("Decorrelated jitter backoff strategy (Unit)", () => {
@@ -469,6 +472,27 @@ suite("Decorrelated jitter backoff strategy (Unit)", () => {
 			ctx.assert.doesNotThrow(
 				() => new DecorrelatedJitterBackoff(100),
 				"should accept base without cap",
+			);
+		});
+	});
+
+	describe("factory function", () => {
+		test("creates DecorrelatedJitterBackoff instance", (ctx: TestContext) => {
+			ctx.plan(2);
+
+			// Arrange & Act
+			const strategy = decorrelatedJitter(100, 5000);
+
+			// Assert
+			ctx.assert.ok(
+				strategy instanceof DecorrelatedJitterBackoff,
+				"should return DecorrelatedJitterBackoff instance",
+			);
+			// Just verify it returns a number (jitter is random)
+			const delay = strategy.nextBackoff();
+			ctx.assert.ok(
+				typeof delay === "number" && delay >= 0,
+				"should work correctly",
 			);
 		});
 	});

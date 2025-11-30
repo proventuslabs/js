@@ -1,6 +1,6 @@
 import { describe, suite, type TestContext, test } from "node:test";
 
-import { FullJitterBackoff } from "./full-jitter-backoff.ts";
+import { FullJitterBackoff, fullJitter } from "./full-jitter-backoff.ts";
 
 /* node:coverage disable */
 suite("Full jitter backoff strategy (Unit)", () => {
@@ -397,6 +397,27 @@ suite("Full jitter backoff strategy (Unit)", () => {
 			ctx.assert.doesNotThrow(
 				() => new FullJitterBackoff(100),
 				"should accept base without cap",
+			);
+		});
+	});
+
+	describe("factory function", () => {
+		test("creates FullJitterBackoff instance", (ctx: TestContext) => {
+			ctx.plan(2);
+
+			// Arrange & Act
+			const strategy = fullJitter(100, 5000);
+
+			// Assert
+			ctx.assert.ok(
+				strategy instanceof FullJitterBackoff,
+				"should return FullJitterBackoff instance",
+			);
+			// Just verify it returns a number (jitter is random)
+			const delay = strategy.nextBackoff();
+			ctx.assert.ok(
+				typeof delay === "number" && delay >= 0,
+				"should work correctly",
 			);
 		});
 	});

@@ -2,32 +2,28 @@ import type { BackoffStrategy } from "../backoff/interface.ts";
 import { waitFor } from "../utils/wait-for.ts";
 
 /**
- * Options for configuring the behavior of the `retry` function.
+ * Configuration options for the `retry` function.
  */
 export type RetryOptions = {
 	/**
-	 * Strategy for calculating delays between retries.
-	 * Should implement `BackoffStrategy`, which typically provides:
-	 * - `resetBackoff()`: Resets the backoff sequence.
-	 * - `nextBackoff()`: Returns the delay in milliseconds for the next retry.
+	 * Delay calculation strategy (required).
+	 * Implements `BackoffStrategy` with `nextBackoff()` and `resetBackoff()` methods.
 	 */
 	strategy: BackoffStrategy;
 
 	/**
-	 * Optional function to determine whether to stop retrying based on the encountered error.
+	 * Stop condition to determine whether to stop retrying.
 	 *
-	 * @param error - The error thrown by the function being retried.
-	 * @param attempt - The attempt index for the current retry (0-based, positive integer).
-	 * @returns `true` to stop retries, anything else to continue.
-	 *
+	 * @param error - The error thrown by the function being retried
+	 * @param attempt - The attempt index (0-based)
+	 * @returns `true` to stop retries, otherwise continues
 	 * @default () => false
 	 */
 	stop?: (error: unknown, attempt: number) => boolean;
 
 	/**
-	 * Optional AbortSignal to cancel the retry operation.
-	 * If the signal is aborted, the `retry` function will immediately reject
-	 * with `signal.reason`.
+	 * Cancellation signal to abort the retry operation.
+	 * If aborted, `retry` rejects with `signal.reason`.
 	 *
 	 * @default undefined
 	 */
@@ -35,30 +31,22 @@ export type RetryOptions = {
 };
 
 /**
- * Attempts to execute a function repeatedly according to a backoff strategy until it succeeds,
- * a provided stop condition is met, or an optional AbortSignal is triggered.
+ * Executes a function repeatedly according to a backoff strategy until it succeeds, stops, or is aborted.
  *
- * @note This method is not concurrently safe as *stateful* strategies might be shared across them.
+ * The retry loop continues until: (1) function succeeds, (2) strategy returns `NaN`, (3) stop function returns `true`, or (4) abort signal triggers.
  *
- * ## Behavior
+ * @note Not concurrently safe - don't share stateful strategies across concurrent operations.
  *
- * The retry loop continues indefinitely until one of these conditions is met:
- * - The function succeeds
- * - The backoff strategy exhausts its retries (returns `NaN`)
- * - The stop function returns `true`
- * - The abort signal is triggered
+ * @template T - The return type of the function being retried
+ * @param fn - The function to retry
+ * @param options - Configuration
+ * @param options.strategy - Delay calculation strategy (required)
+ * @param options.stop - Stop condition (default: `() => false`)
+ * @param options.signal - Cancellation signal (optional)
+ * @returns Resolves with the function's result on success
  *
- * @template T - The return type of the function being retried.
- * @param fn - The function to retry. Can be synchronous or return a promise.
- * @param options - Configuration options for retrying.
- * @param options.strategy - Backoff strategy used to determine delays between retries.
- * @param options.stop - Optional function called with the error to determine if retrying should stop. Return `true` to stop.
- * @param options.signal - Optional AbortSignal to cancel retries. If aborted, the returned promise is rejected with `signal.reason`.
- * @returns A promise that resolves with the function's result if it eventually succeeds.
- *
- * @throws {unknown} The last encountered error if retries are exhausted or if the stop function returns `true`.
- * @throws {unknown} The reason of the AbortSignal if the operation is aborted (generally {@link DOMException} `AbortError`).
- * @throws {RangeError} If the backoff strategy returns a delay exceeding INT32_MAX (2147483647ms, approximately 24.8 days).
+ * @throws {unknown} Last error if retries exhausted, stop condition met, or aborted
+ * @throws {RangeError} If delay exceeds INT32_MAX (2147483647ms)
  *
  * @example
  * ```ts

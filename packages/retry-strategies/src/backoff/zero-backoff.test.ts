@@ -1,6 +1,6 @@
 import { describe, suite, type TestContext, test } from "node:test";
 
-import { ZeroBackoff } from "./zero-backoff.ts";
+import { ZeroBackoff, zero } from "./zero-backoff.ts";
 
 /* node:coverage disable */
 suite("Zero backoff strategy (Unit)", () => {
@@ -95,6 +95,31 @@ suite("Zero backoff strategy (Unit)", () => {
 				backoff2.nextBackoff(),
 				0,
 				"should not affect second instance",
+			);
+		});
+	});
+
+	describe("factory function", () => {
+		test("creates ZeroBackoff instance", (ctx: TestContext) => {
+			ctx.plan(3);
+
+			// Arrange & Act
+			const strategy = zero();
+
+			// Assert
+			ctx.assert.ok(
+				strategy instanceof ZeroBackoff,
+				"should return ZeroBackoff instance",
+			);
+			ctx.assert.strictEqual(
+				strategy.nextBackoff(),
+				0,
+				"should work correctly",
+			);
+			ctx.assert.strictEqual(
+				strategy.nextBackoff(),
+				0,
+				"should always return zero",
 			);
 		});
 	});

@@ -1,15 +1,13 @@
 import type { BackoffStrategy } from "./interface.ts";
 
 /**
- * A fixed backoff policy that always returns NaN for nextBackoff(),
- * meaning that the operation should never be retried.
+ * Always returns `NaN` to prevent retries.
  */
 export class StopBackoff implements BackoffStrategy {
 	/**
 	 * Calculate the next backoff delay.
-	 * Always returns NaN to indicate no retries should be made.
 	 *
-	 * @returns Always returns NaN to signal no retry
+	 * @returns Always `NaN`
 	 */
 	public nextBackoff(): number {
 		return Number.NaN;
@@ -17,9 +15,15 @@ export class StopBackoff implements BackoffStrategy {
 
 	/**
 	 * Reset to the initial state.
-	 * Since StopBackoff has no state, this is a no-op.
 	 */
 	public resetBackoff(): void {
 		// No-op: StopBackoff has no state to reset
 	}
 }
+
+/**
+ * Always returns `NaN` to prevent retries.
+ *
+ * @returns StopBackoff instance
+ */
+export const stop = (): StopBackoff => new StopBackoff();

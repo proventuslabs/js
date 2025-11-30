@@ -1,6 +1,6 @@
 import { describe, suite, type TestContext, test } from "node:test";
 
-import { FibonacciBackoff } from "./fibonacci-backoff.ts";
+import { FibonacciBackoff, fibonacci } from "./fibonacci-backoff.ts";
 
 /* node:coverage disable */
 suite("Fibonacci backoff strategy (Unit)", () => {
@@ -389,6 +389,31 @@ suite("Fibonacci backoff strategy (Unit)", () => {
 			ctx.assert.doesNotThrow(
 				() => new FibonacciBackoff(100),
 				"should accept base without cap",
+			);
+		});
+	});
+
+	describe("factory function", () => {
+		test("creates FibonacciBackoff instance", (ctx: TestContext) => {
+			ctx.plan(3);
+
+			// Arrange & Act
+			const strategy = fibonacci(100, 5000);
+
+			// Assert
+			ctx.assert.ok(
+				strategy instanceof FibonacciBackoff,
+				"should return FibonacciBackoff instance",
+			);
+			ctx.assert.strictEqual(
+				strategy.nextBackoff(),
+				100,
+				"should work correctly",
+			);
+			ctx.assert.strictEqual(
+				strategy.nextBackoff(),
+				100,
+				"should maintain state correctly",
 			);
 		});
 	});

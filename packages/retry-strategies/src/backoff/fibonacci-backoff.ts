@@ -1,10 +1,9 @@
 import type { BackoffStrategy } from "./interface.ts";
 
 /**
- * A backoff policy that increases the delay following the Fibonacci sequence.
+ * Increases the delay following the Fibonacci sequence.
  *
- * The delay for each attempt follows: base, base, 2*base, 3*base, 5*base, 8*base, 13*base...
- * The sequence is capped at a maximum delay value.
+ * Formula: `min(cap, base * fib(n))`
  */
 export class FibonacciBackoff implements BackoffStrategy {
 	private readonly base: number;
@@ -15,14 +14,9 @@ export class FibonacciBackoff implements BackoffStrategy {
 	/**
 	 * Creates a new FibonacciBackoff instance.
 	 *
-	 * @param base - The base delay in milliseconds (must be >= 0)
-	 * @param cap - The maximum delay in milliseconds (must be >= base, defaults to Infinity)
-	 * @throws {RangeError} If base or cap is NaN or invalid
-	 *
-	 * @remarks
-	 * After an extremely large number of retry attempts (~90+ iterations),
-	 * floating-point precision may be lost in Fibonacci calculations. In practice, this is not
-	 * a concern as the cap will have been reached long before precision loss occurs.
+	 * @param base - Base delay in milliseconds (>= 0)
+	 * @param cap - Maximum delay in milliseconds (>= base, default: Infinity)
+	 * @throws {RangeError} If base or cap is invalid
 	 */
 	public constructor(base: number, cap: number = Number.POSITIVE_INFINITY) {
 		if (Number.isNaN(base)) {
@@ -49,9 +43,8 @@ export class FibonacciBackoff implements BackoffStrategy {
 
 	/**
 	 * Calculate the next backoff delay.
-	 * Returns a delay that follows the Fibonacci sequence, capped at the maximum.
 	 *
-	 * @returns The next delay in milliseconds following the Fibonacci sequence
+	 * @returns Delay in milliseconds: `min(cap, base * fib(n))`
 	 */
 	public nextBackoff(): number {
 		const delay = Math.min(this.cap, this.currentDelay);
@@ -66,10 +59,23 @@ export class FibonacciBackoff implements BackoffStrategy {
 
 	/**
 	 * Reset to the initial state.
-	 * Resets the Fibonacci sequence to start from the beginning.
 	 */
 	public resetBackoff(): void {
 		this.previousDelay = 0;
 		this.currentDelay = this.base;
 	}
 }
+
+/**
+ * Increases the delay following the Fibonacci sequence.
+ * Formula: `min(cap, base * fib(n))`
+ *
+ * @param base - Base delay in milliseconds (>= 0)
+ * @param cap - Maximum delay in milliseconds (>= base, default: Infinity)
+ * @returns FibonacciBackoff instance
+ * @throws {RangeError} If base or cap is invalid
+ */
+export const fibonacci = (
+	base: number,
+	cap: number = Number.POSITIVE_INFINITY,
+): FibonacciBackoff => new FibonacciBackoff(base, cap);

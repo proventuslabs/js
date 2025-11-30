@@ -1,9 +1,9 @@
 import type { BackoffStrategy } from "./interface.ts";
 
 /**
- * A backoff policy that increases the delay linearly by a fixed increment on each retry.
+ * Increases the delay linearly by a fixed increment.
  *
- * The delay for attempt n is: min(cap, initialDelay + (increment * n))
+ * Formula: `min(cap, initialDelay + (increment * n))`
  */
 export class LinearBackoff implements BackoffStrategy {
 	private readonly initialDelay: number;
@@ -14,10 +14,10 @@ export class LinearBackoff implements BackoffStrategy {
 	/**
 	 * Creates a new LinearBackoff instance.
 	 *
-	 * @param increment - The amount to increase the delay by on each retry (must be >= 0)
-	 * @param initialDelay - The initial delay in milliseconds before any increments (must be >= 0, defaults to 0)
-	 * @param cap - The maximum delay in milliseconds (must be >= initialDelay, defaults to Infinity)
-	 * @throws {RangeError} If increment, initialDelay, or cap is NaN or invalid
+	 * @param increment - Delay increment per retry (>= 0)
+	 * @param initialDelay - Initial delay (>= 0, default: 0)
+	 * @param cap - Maximum delay (>= initialDelay, default: Infinity)
+	 * @throws {RangeError} If parameters are invalid
 	 */
 	public constructor(
 		increment: number,
@@ -59,9 +59,8 @@ export class LinearBackoff implements BackoffStrategy {
 
 	/**
 	 * Calculate the next backoff delay.
-	 * Returns a delay that increases linearly with each call, capped at the maximum.
 	 *
-	 * @returns The next delay in milliseconds: min(cap, initialDelay + (increment * attemptCount))
+	 * @returns Delay in milliseconds: `min(cap, initialDelay + (increment * n))`
 	 */
 	public nextBackoff(): number {
 		const delay = Math.min(
@@ -74,9 +73,24 @@ export class LinearBackoff implements BackoffStrategy {
 
 	/**
 	 * Reset to the initial state.
-	 * Resets the attempt counter to 0, so the next call to nextBackoff will return the initial delay.
 	 */
 	public resetBackoff(): void {
 		this.attemptCount = 0;
 	}
 }
+
+/**
+ * Increases the delay linearly by a fixed increment.
+ * Formula: `min(cap, initialDelay + (increment * n))`
+ *
+ * @param increment - Delay increment per retry (>= 0)
+ * @param initialDelay - Initial delay (>= 0, default: 0)
+ * @param cap - Maximum delay (>= initialDelay, default: Infinity)
+ * @returns LinearBackoff instance
+ * @throws {RangeError} If parameters are invalid
+ */
+export const linear = (
+	increment: number,
+	initialDelay = 0,
+	cap: number = Number.POSITIVE_INFINITY,
+): LinearBackoff => new LinearBackoff(increment, initialDelay, cap);

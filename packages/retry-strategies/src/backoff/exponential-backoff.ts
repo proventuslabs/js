@@ -1,9 +1,9 @@
 import type { BackoffStrategy } from "./interface.ts";
 
 /**
- * A backoff policy that increases the delay exponentially using the AWS algorithm.
+ * Increases the delay exponentially using the AWS algorithm.
  *
- * The delay for attempt n is: min(cap, base * 2 ** n)
+ * Formula: `min(cap, base * 2^n)`
  *
  * @see {@link https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/ AWS Exponential Backoff And Jitter}
  */
@@ -15,14 +15,9 @@ export class ExponentialBackoff implements BackoffStrategy {
 	/**
 	 * Creates a new ExponentialBackoff instance.
 	 *
-	 * @param base - The base delay in milliseconds (must be >= 0)
-	 * @param cap - The maximum delay in milliseconds (must be >= base, defaults to Infinity)
-	 * @throws {RangeError} If base or cap is NaN or invalid
-	 *
-	 * @remarks
-	 * After an extremely large number of retry attempts (50+ for exponential strategies),
-	 * floating-point precision may be lost in delay calculations. In practice, this is not
-	 * a concern as the cap will have been reached long before precision loss occurs.
+	 * @param base - Base delay in milliseconds (>= 0)
+	 * @param cap - Maximum delay in milliseconds (>= base, default: Infinity)
+	 * @throws {RangeError} If base or cap is invalid
 	 */
 	public constructor(base: number, cap: number = Number.POSITIVE_INFINITY) {
 		if (Number.isNaN(base)) {
@@ -48,9 +43,8 @@ export class ExponentialBackoff implements BackoffStrategy {
 
 	/**
 	 * Calculate the next backoff delay.
-	 * Returns a delay that increases exponentially with each call, capped at the maximum.
 	 *
-	 * @returns The next delay in milliseconds: min(cap, base * 2 ** attemptCount)
+	 * @returns Delay in milliseconds: `min(cap, base * 2^n)`
 	 */
 	public nextBackoff(): number {
 		const delay = Math.min(this.cap, this.base * 2 ** this.attemptCount);
@@ -60,9 +54,24 @@ export class ExponentialBackoff implements BackoffStrategy {
 
 	/**
 	 * Reset to the initial state.
-	 * Resets the attempt counter to 0, so the next call to nextBackoff will return the base delay.
 	 */
 	public resetBackoff(): void {
 		this.attemptCount = 0;
 	}
 }
+
+/**
+ * Increases the delay exponentially using the AWS algorithm.
+ * Formula: `min(cap, base * 2^n)`
+ *
+ * @param base - Base delay in milliseconds (>= 0)
+ * @param cap - Maximum delay in milliseconds (>= base, default: Infinity)
+ * @returns ExponentialBackoff instance
+ * @throws {RangeError} If base or cap is invalid
+ *
+ * @see {@link https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/ AWS Exponential Backoff And Jitter}
+ */
+export const exponential = (
+	base: number,
+	cap: number = Number.POSITIVE_INFINITY,
+): ExponentialBackoff => new ExponentialBackoff(base, cap);

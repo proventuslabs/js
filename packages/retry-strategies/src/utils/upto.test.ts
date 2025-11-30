@@ -1,7 +1,8 @@
 import { describe, suite, type TestContext, test } from "node:test";
 
+import { ExponentialBackoff } from "../backoff/exponential-backoff.ts";
 import type { BackoffStrategy } from "../backoff/interface.ts";
-import { upto } from "./upto.ts";
+import { UptoBackoff, upto } from "./upto.ts";
 
 /* node:coverage disable */
 
@@ -456,6 +457,34 @@ suite("Up to retry limiter (Unit)", () => {
 			ctx.assert.ok(
 				Number.isNaN(limited.nextBackoff()),
 				"should return NaN after large retry count",
+			);
+		});
+	});
+
+	describe("factory function", () => {
+		test("creates UptoBackoff instance", (ctx: TestContext) => {
+			ctx.plan(3);
+
+			// Arrange
+			const exponential = new ExponentialBackoff(100, 5000);
+
+			// Act
+			const strategy = upto(3, exponential);
+
+			// Assert
+			ctx.assert.ok(
+				strategy instanceof UptoBackoff,
+				"should return UptoBackoff instance",
+			);
+			ctx.assert.strictEqual(
+				strategy.nextBackoff(),
+				100,
+				"should work correctly",
+			);
+			ctx.assert.strictEqual(
+				strategy.nextBackoff(),
+				200,
+				"should maintain state correctly",
 			);
 		});
 	});

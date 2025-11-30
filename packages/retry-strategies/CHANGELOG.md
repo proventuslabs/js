@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/proventuslabs/js/compare/retry-strategies@v0.1.1...retry-strategies@v0.1.2) (2025-11-30)
+
+
+### Features
+
+* **retry-strategies:** add functional API ([#13](https://github.com/proventuslabs/js/issues/13)) ([102345e](https://github.com/proventuslabs/js/commit/102345eb01f6ffea3445a497ef48ee645601dd77))
+
 ## [0.1.1](https://github.com/proventuslabs/js/compare/retry-strategies@v0.1.0...retry-strategies@v0.1.1) (2025-11-28)
 
 
